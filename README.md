@@ -1,4 +1,4 @@
-# Albatross Framework
+# Albatross Text
 A collection of libraries that deals with string manupulation
 
 # Libraries
