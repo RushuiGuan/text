@@ -8,7 +8,8 @@ namespace Sample {
 			var options = new TableOptions<Contact>(builder);
 			var fixture = new Fixture();
 			var contacts = fixture.CreateMany<Contact>(20);
-			contacts.StringTable().Print(Console.Out);
+			contacts.StringTable().PrintConsole();
+			contacts.First().PropertyTable().Print(Console.Out);
 		}
 	}
 }

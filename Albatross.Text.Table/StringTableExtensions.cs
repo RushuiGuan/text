@@ -17,9 +17,9 @@ namespace Albatross.Text.Table {
 		public static StringTable PropertyTable<T>(this T instance) {
 			var dictionary = new Dictionary<string, object>();
 			Albatross.Reflection.Enumerations.Property(instance, null, null, dictionary);
-			const string KeyColumn = "Key";
+			const string PropertyColumn = "Property";
 			const string ValueColumn = "Value";
-			StringTable table = new StringTable(KeyColumn, ValueColumn);
+			StringTable table = new StringTable(PropertyColumn, ValueColumn);
 			foreach (var item in dictionary) {
 				table.Add(item.Key, TextOptionBuilderExtensions.DefaultFormat(item.Value));
 			}
