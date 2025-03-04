@@ -6,7 +6,7 @@
 		<EnableWindowsTargeting>True</EnableWindowsTargeting>
 		<LangVersion>Latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<RepositoryUrl>https://github.com/RushuiGuan/framework</RepositoryUrl>
+		<RepositoryUrl>https://github.com/RushuiGuan/text</RepositoryUrl>
 		<RepositoryProjectRoot>$(RepositoryUrl)/tree/main</RepositoryProjectRoot>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>

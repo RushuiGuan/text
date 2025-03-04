@@ -14,6 +14,18 @@ namespace Albatross.Text.Table {
 			return table;
 		}
 
+		public static StringTable PropertyTable<T>(this T instance) {
+			var dictionary = new Dictionary<string, object>();
+			Albatross.Reflection.Enumerations.Property(instance, null, null, dictionary);
+			const string KeyColumn = "Key";
+			const string ValueColumn = "Value";
+			StringTable table = new StringTable(KeyColumn, ValueColumn);
+			foreach (var item in dictionary) {
+				table.Add(item.Key, TextOptionBuilderExtensions.DefaultFormat(item.Value));
+			}
+			return table;
+		}
+
 		public static StringTable SetColumn(this StringTable table, Func<StringTable.Column, bool> predicate, Action<StringTable.Column> action) {
 			foreach (var column in table.Columns.Where(x => predicate(x))) {
 				action(column);
@@ -36,7 +48,7 @@ namespace Albatross.Text.Table {
 		public static StringTable SetWidthLimit(this StringTable table, int width) {
 			table.AdjustColumnWidth(width);
 			return table;
-		}	
+		}
 
 		public static void PrintConsole(this StringTable table) {
 			table.AdjustColumnWidth(GetConsoleWith());

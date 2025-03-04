@@ -29,7 +29,7 @@ namespace Albatross.Text.Table {
 				var count = this.ColumnOptionBuilders.Count;
 				ColumnOptionBuilders[column] = new TableColumnOptionBuilder<T> {
 					GetValueDelegate = getValue,
-					Formatter = (T entity, object? value) => BuilderExtensions.DefaultFormat(value),
+					Formatter = (T entity, object? value) => TextOptionBuilderExtensions.DefaultFormat(value),
 					GetHeader = () => column,
 					GetOrder = () => count,
 				};

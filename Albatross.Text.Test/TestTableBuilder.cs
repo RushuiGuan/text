@@ -14,23 +14,23 @@ namespace Albatross.Text.Test {
 		[Fact]
 		public void TestDefaultFormat() {
 			object? obj = null;
-			BuilderExtensions.DefaultFormat(obj).Should().Be("");
+			TextOptionBuilderExtensions.DefaultFormat(obj).Should().Be("");
 			obj = 1;
-			BuilderExtensions.DefaultFormat(obj).Should().Be("1");
+			TextOptionBuilderExtensions.DefaultFormat(obj).Should().Be("1");
 			obj = 1.0M;
-			BuilderExtensions.DefaultFormat(obj).Should().Be("1");
+			TextOptionBuilderExtensions.DefaultFormat(obj).Should().Be("1");
 			obj = "1";
-			BuilderExtensions.DefaultFormat(obj).Should().Be("1");
+			TextOptionBuilderExtensions.DefaultFormat(obj).Should().Be("1");
 			obj = 1.0;
-			BuilderExtensions.DefaultFormat(obj).Should().Be("1");
+			TextOptionBuilderExtensions.DefaultFormat(obj).Should().Be("1");
 			obj = new DateOnly(2000, 1, 1);
-			BuilderExtensions.DefaultFormat(obj).Should().Be("2000-01-01");
+			TextOptionBuilderExtensions.DefaultFormat(obj).Should().Be("2000-01-01");
 			obj = new DateTime(2000, 1, 1, 1, 1, 1);
-			BuilderExtensions.DefaultFormat(obj).Should().Be("2000-01-01T01:01:01");
+			TextOptionBuilderExtensions.DefaultFormat(obj).Should().Be("2000-01-01T01:01:01");
 			obj = DateTime.SpecifyKind(new DateTime(2000, 1, 1, 1, 1, 1), DateTimeKind.Utc);
-			BuilderExtensions.DefaultFormat(obj).Should().Be("2000-01-01T01:01:01Z");
+			TextOptionBuilderExtensions.DefaultFormat(obj).Should().Be("2000-01-01T01:01:01Z");
 			obj = new DateTimeOffset(new DateTime(2000, 1, 1, 1, 1, 1), TimeSpan.FromHours(1));
-			BuilderExtensions.DefaultFormat(obj).Should().Be("2000-01-01T01:01:01+01:00");
+			TextOptionBuilderExtensions.DefaultFormat(obj).Should().Be("2000-01-01T01:01:01+01:00");
 		}
 
 		[Fact]

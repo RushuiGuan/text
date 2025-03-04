@@ -1,11 +1,10 @@
 ﻿using Albatross.Reflection;
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Albatross.Text.Table {
-	public static class BuilderExtensions {
+	public static class TextOptionBuilderExtensions {
 		public static TableOptionBuilder<T> Format<T, P>(this TableOptionBuilder<T> builder, Expression<Func<T, P>> lambda, string format)
 			=> builder.Format(lambda, (T entity, object? value) => string.Format($"{{0:{format}}}", value));
 
