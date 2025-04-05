@@ -4,8 +4,15 @@ using System.IO;
 using System.Linq;
 
 namespace Albatross.Text.Table {
+	[Flags]
+	public enum FilterMode {
+		StartsWith = 1,
+		EndsWith = 2,
+		Contains = 4,
+		CaseSensitive = 8,
+	}
 	public class StringTable {
-		public class Column {
+		public record class Column {
 			public Column(string name, int index) {
 				Name = name;
 				Index = index;
@@ -118,6 +125,44 @@ namespace Albatross.Text.Table {
 			if (!string.IsNullOrEmpty(line)) {
 				writer.WriteLine("-".PadRight(line.Length, '-'));
 			}
+		}
+
+		public StringTable Filter(string? column, string text, FilterMode mode) {
+			int? columnIndex = null;
+			if (!string.IsNullOrEmpty(column)) {
+				var selected = columns.Where(x => x.Name == column).FirstOrDefault() ?? throw new ArgumentException($"{column} is not a valid colume");
+				columnIndex = selected.Index;
+			}
+			var stringTable = new StringTable();
+			stringTable.columns = columns.Select(x => x with { }).ToArray();
+			foreach (var row in Rows) {
+				if (Filter(columnIndex, row, text, mode)) {
+					stringTable.rows.Add(row);
+				}
+			}
+			return stringTable;
+		}
+
+		internal bool Filter(int? columnIndex, Row row, string text, FilterMode mode) {
+			string[] array;
+			if (columnIndex.HasValue) {
+				array = [row.Values[columnIndex.Value]];
+			} else {
+				array = row.Values;
+			}
+			var stringComparison = (mode & FilterMode.CaseSensitive) > 0 ? StringComparison.InvariantCulture : StringComparison.InvariantCultureIgnoreCase;
+			foreach (var value in array) {
+				if ((FilterMode.StartsWith) > 0 && value.StartsWith(text, stringComparison)) {
+					return true;
+				}
+				if ((FilterMode.EndsWith) > 0 && value.EndsWith(text, stringComparison)) {
+					return true;
+				}
+				if ((FilterMode.Contains) > 0 && value.Contains(text, stringComparison)) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }
