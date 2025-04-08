@@ -39,7 +39,8 @@ namespace Albatross.Text.Table {
 				if (!NeverTruncate && value.Length > DisplayWidth) {
 					value = value.Substring(0, DisplayWidth);
 				}
-				if (AlignRight) {
+				if (NeverTruncate) {
+				} else if (AlignRight) {
 					value = value.PadLeft(DisplayWidth);
 				} else {
 					value = value.PadRight(DisplayWidth);
@@ -100,7 +101,7 @@ namespace Albatross.Text.Table {
 			if (array.Length != columns.Length) {
 				throw new ArgumentException($"Table is expecting rows with {columns.Length} columns");
 			}
-			rows.Add(new Row(array.Select(x=>x.Text).ToArray()));
+			rows.Add(new Row(array.Select(x => x.Text).ToArray()));
 			for (int i = 0; i < columns.Length; i++) {
 				columns[i].SetMaxWidth(array[i].DisplayWidth);
 			}
@@ -108,15 +109,16 @@ namespace Albatross.Text.Table {
 
 		public void Print(TextWriter writer) {
 			var visibleColumns = this.Columns.Where(x => x.DisplayWidth > 0).ToArray();
-			var line = string.Join(" ", visibleColumns.Select(x => x.GetText(x.Name)));
-			writer.WriteLine(line);
-			writer.WriteLine("-".PadRight(line.Length, '-'));
+			var header = string.Join(" ", visibleColumns.Select(x => x.GetText(x.Name)));
+			writer.WriteLine(header);
+			writer.WriteLine("-".PadRight(header.Length, '-'));
+			string? body = null;
 			foreach (var row in Rows) {
-				line = string.Join(" ", visibleColumns.Select(x => x.GetText(row.Values[x.Index])));
-				writer.WriteLine(line);
+				body = string.Join(" ", visibleColumns.Select(x => x.GetText(row.Values[x.Index])));
+				writer.WriteLine(body);
 			}
-			if (!string.IsNullOrEmpty(line)) {
-				writer.WriteLine("-".PadRight(line.Length, '-'));
+			if (!string.IsNullOrEmpty(body)) {
+				writer.WriteLine("-".PadRight(header.Length, '-'));
 			}
 		}
 

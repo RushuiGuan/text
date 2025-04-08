@@ -40,11 +40,6 @@ namespace Albatross.Text.Table {
 		public static StringTable AlignRight(this StringTable table, Func<StringTable.Column, bool> predicate, bool value = true)
 			=> table.SetColumn(predicate, x => x.AlignRight = value);
 
-		public static StringTable ResetColumns(this StringTable table) {
-			table.ResetColumns();
-			return table;
-		}
-
 		public static StringTable SetWidthLimit(this StringTable table, int width) {
 			table.AdjustColumnWidth(width);
 			return table;
