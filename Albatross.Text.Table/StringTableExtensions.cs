@@ -21,7 +21,7 @@ namespace Albatross.Text.Table {
 			const string ValueColumn = "Value";
 			StringTable table = new StringTable(PropertyColumn, ValueColumn);
 			foreach (var item in dictionary) {
-				table.Add(item.Key, TextOptionBuilderExtensions.DefaultFormat(item.Value));
+				table.Add(new TextValue(item.Key), new TextValue(TextOptionBuilderExtensions.DefaultFormat(item.Value)));
 			}
 			return table;
 		}

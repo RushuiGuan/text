@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Albatross.Text.Table {
 	public class TableColumnOptionBuilder<T> {
 		public required Func<T, object?> GetValueDelegate { get; set; }
-		public required Func<T, object?, string> Formatter { get; set; }
+		public required Func<T, object?, TextValue> Formatter { get; set; }
 		public required Func<string> GetHeader { get; set; }
 		public required Func<int> GetOrder { get; set; }
 	}
@@ -29,7 +29,7 @@ namespace Albatross.Text.Table {
 				var count = this.ColumnOptionBuilders.Count;
 				ColumnOptionBuilders[column] = new TableColumnOptionBuilder<T> {
 					GetValueDelegate = getValue,
-					Formatter = (T entity, object? value) => TextOptionBuilderExtensions.DefaultFormat(value),
+					Formatter = (T entity, object? value) => new TextValue(TextOptionBuilderExtensions.DefaultFormat(value)),
 					GetHeader = () => column,
 					GetOrder = () => count,
 				};
@@ -42,7 +42,7 @@ namespace Albatross.Text.Table {
 			return this;
 		}
 
-		public TableOptionBuilder<T> Format(string property, Func<T, object?, string> format) {
+		public TableOptionBuilder<T> Format(string property, Func<T, object?, TextValue> format) {
 			this.ColumnOptionBuilders[property].Formatter = format;
 			return this;
 		}

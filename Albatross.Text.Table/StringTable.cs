@@ -65,12 +65,6 @@ namespace Albatross.Text.Table {
 
 		public int TotalWidth => Columns.Sum(x => x.ActualWidth) - 1;
 
-		public void ResetColumns() {
-			foreach (var column in Columns) {
-				column.DisplayWidth = column.MaxWidth;
-			}
-		}
-
 		public void AdjustColumnWidth(int maxWidth) {
 			var overflow = TotalWidth - maxWidth;
 			if (overflow > 0) {
@@ -99,14 +93,16 @@ namespace Albatross.Text.Table {
 			}
 		}
 
-		public void Add(params IEnumerable<string> values) {
+		public void Add(params IEnumerable<string> values) => this.Add(values.Select(x => new TextValue(x)));
+
+		public void Add(params IEnumerable<TextValue> values) {
 			var array = values.ToArray();
 			if (array.Length != columns.Length) {
 				throw new ArgumentException($"Table is expecting rows with {columns.Length} columns");
 			}
-			rows.Add(new Row(array));
+			rows.Add(new Row(array.Select(x=>x.Text).ToArray()));
 			for (int i = 0; i < columns.Length; i++) {
-				columns[i].SetMaxWidth(array[i].Length);
+				columns[i].SetMaxWidth(array[i].DisplayWidth);
 			}
 		}
 

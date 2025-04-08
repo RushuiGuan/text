@@ -6,9 +6,9 @@ using System.Reflection;
 namespace Albatross.Text.Table {
 	public static class TextOptionBuilderExtensions {
 		public static TableOptionBuilder<T> Format<T, P>(this TableOptionBuilder<T> builder, Expression<Func<T, P>> lambda, string format)
-			=> builder.Format(lambda, (T entity, object? value) => string.Format($"{{0:{format}}}", value));
+			=> builder.Format(lambda, (T entity, object? value) => new TextValue(string.Format($"{{0:{format}}}", value)));
 
-		public static TableOptionBuilder<T> Format<T, P>(this TableOptionBuilder<T> buidler, Expression<Func<T, P>> lambda, Func<T, object?, string> format)
+		public static TableOptionBuilder<T> Format<T, P>(this TableOptionBuilder<T> buidler, Expression<Func<T, P>> lambda, Func<T, object?, TextValue> format)
 			=> buidler.Format(lambda.GetPropertyInfo().Name, format);
 
 		public static TableOptionBuilder<T> ColumnOrder<T, P>(this TableOptionBuilder<T> builder, Expression<Func<T, P>> lambda, Func<int> getOrder)
@@ -59,7 +59,7 @@ namespace Albatross.Text.Table {
 				int order = index++;
 				builder.ColumnOptionBuilders[property.Name] = new TableColumnOptionBuilder<T> {
 					GetValueDelegate = x => property.GetValue(x),
-					Formatter = (T entity, object? value) => DefaultFormat(value),
+					Formatter = (T entity, object? value) => new TextValue(DefaultFormat(value)),
 					GetHeader = () => property.Name,
 					GetOrder = () => order,
 				};

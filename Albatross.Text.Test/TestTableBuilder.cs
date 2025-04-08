@@ -99,7 +99,7 @@ namespace Albatross.Text.Test {
 			var options = new TableOptions<TestClass>(builder);
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0 };
 			var values = options.GetValue(obj);
-			values.Should().BeEquivalentTo(new[] { "1", "name", "1" });
+			values.Select(x => x.Text).Should().BeEquivalentTo(new[] { "1", "name", "1" });
 		}
 
 		[Fact]
@@ -109,7 +109,7 @@ namespace Albatross.Text.Test {
 			var options = new TableOptions<TestClass>(builder);
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0 };
 			var values = options.GetValue(obj);
-			values.Should().BeEquivalentTo(new[] { "1", "name", "1.00" });
+			values.Select(x => x.Text).Should().BeEquivalentTo(new[] { "1", "name", "1.00" });
 		}
 
 		[Fact]

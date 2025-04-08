@@ -6,7 +6,7 @@ using System.Linq;
 namespace Albatross.Text.Table {
 	public class TableColumnOption<T> {
 		public required Func<T, object?> GetValueDelegate { get; init; }
-		public required Func<T, object?, string> Formatter { get; init; }
+		public required Func<T, object?, TextValue> Formatter { get; init; }
 		public required string Header { get; init; }
 		public required int Order { get; set; }
 		public required string Property { get; set; }
@@ -38,8 +38,8 @@ namespace Albatross.Text.Table {
 
 		public string[] Headers => ColumnOptions.Select(x => x.Header).ToArray();
 
-		public string[] GetValue(T item) {
-			var array = new string[ColumnOptions.Length];
+		public TextValue[] GetValue(T item) {
+			var array = new TextValue[ColumnOptions.Length];
 			for (int i = 0; i < ColumnOptions.Length; i++) {
 				var value = ColumnOptions[i].GetValueDelegate(item);
 				array[i] = ColumnOptions[i].Formatter(item, value);

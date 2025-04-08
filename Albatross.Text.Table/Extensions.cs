@@ -14,7 +14,7 @@ namespace Albatross.Text.Table {
 			writer.WriteItems(options.Headers, "|").WriteLine();
 			writer.WriteItems(options.ColumnOptions.Select(x => "-").ToArray(), "|").WriteLine();
 			foreach (var item in items) {
-				writer.WriteItems(options.GetValue(item), "|").WriteLine();
+				writer.WriteItems(options.GetValue(item).Select(x=>x.Text), "|").WriteLine();
 			}
 		}
 	}
