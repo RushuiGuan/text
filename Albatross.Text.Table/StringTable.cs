@@ -9,22 +9,18 @@ namespace Albatross.Text.Table {
 			public Column(string name, int index) {
 				Name = name;
 				Index = index;
-				SetMaxWidth(name.Length);
+				SetMaxTextWidth(name.Length);
 			}
 			public int Index { get; }
 			public string Name { get; }
 			/// <summary>
-			/// The maximum width of the data for this column
+			/// The maximum width of the text for this column
 			/// </summary>
-			public int MaxWidth { get; private set; }
-			/// <summary>
-			/// if true, this column can still be hidden but can never be truncated
-			/// </summary>
-			public bool NeverTruncate { get; set; } = false;
+			public int MaxTextWidth { get; private set; }
 
-			public void SetMaxWidth(int width) {
-				if (width > MaxWidth) {
-					MaxWidth = width;
+			public void SetMaxTextWidth(int width) {
+				if (width > MaxTextWidth) {
+					MaxTextWidth = width;
 					DisplayWidth = width;
 				}
 			}
@@ -35,22 +31,13 @@ namespace Albatross.Text.Table {
 			public int DisplayWidth { get; internal set; }
 			public int ActualWidth => DisplayWidth == 0 ? 0 : DisplayWidth + 1;
 			public bool AlignRight { get; set; }
-			public string GetText(string value) {
-				if (!NeverTruncate && value.Length > DisplayWidth) {
-					value = value.Substring(0, DisplayWidth);
-				}
-				if (NeverTruncate) {
-				} else if (AlignRight) {
-					value = value.PadLeft(DisplayWidth);
-				} else {
-					value = value.PadRight(DisplayWidth);
-				}
-				return value;
+			public string GetText(TextValue value) {
+				return value.GetText(DisplayWidth, AlignRight);
 			}
 		}
 		public class Row {
-			public string[] Values { get; }
-			public Row(params string[] values) {
+			public TextValue[] Values { get; }
+			public Row(params TextValue[] values) {
 				Values = values;
 			}
 		}
@@ -72,7 +59,7 @@ namespace Albatross.Text.Table {
 				for (int i = Columns.Length - 1; i >= 0; i--) {
 					var column = Columns[i];
 					// if the MinWidth of the column is set, reduce the DisplayWidth as much as possible
-					if (column.MinWidth < column.MaxWidth) {
+					if (column.MinWidth < column.MaxTextWidth) {
 						column.DisplayWidth = Math.Max(column.MinWidth, column.DisplayWidth - overflow);
 						overflow = TotalWidth - maxWidth;
 						// when a column width is set to 0, the reduced width could be width + 1 therefore
@@ -101,15 +88,15 @@ namespace Albatross.Text.Table {
 			if (array.Length != columns.Length) {
 				throw new ArgumentException($"Table is expecting rows with {columns.Length} columns");
 			}
-			rows.Add(new Row(array.Select(x => x.Text).ToArray()));
+			rows.Add(new Row(array));
 			for (int i = 0; i < columns.Length; i++) {
-				columns[i].SetMaxWidth(array[i].DisplayWidth);
+				columns[i].SetMaxTextWidth(array[i].TextWidth);
 			}
 		}
 
 		public void Print(TextWriter writer) {
 			var visibleColumns = this.Columns.Where(x => x.DisplayWidth > 0).ToArray();
-			var header = string.Join(" ", visibleColumns.Select(x => x.GetText(x.Name)));
+			var header = string.Join(" ", visibleColumns.Select(x => x.GetText(new TextValue(x.Name))));
 			writer.WriteLine(header);
 			writer.WriteLine("-".PadRight(header.Length, '-'));
 			string? body = null;
@@ -139,14 +126,14 @@ namespace Albatross.Text.Table {
 		}
 
 		internal bool Filter(int? columnIndex, Row row, Func<string, bool> predicate) {
-			string[] array;
+			TextValue[] array;
 			if (columnIndex.HasValue) {
 				array = [row.Values[columnIndex.Value]];
 			} else {
 				array = row.Values;
 			}
 			foreach (var value in array) {
-				if (predicate(value)) {
+				if (predicate(value.Text)) {
 					return true;
 				}
 			}

@@ -26,7 +26,7 @@ namespace Albatross.Text.Test {
 			foreach (var row in data) {
 				table.Add([row]);
 			}
-			Assert.Equal(data.Union([column]).Max(x => x.Length), table.Columns[0].MaxWidth);
+			Assert.Equal(data.Union([column]).Max(x => x.Length), table.Columns[0].MaxTextWidth);
 		}
 
 
@@ -44,7 +44,7 @@ namespace Albatross.Text.Test {
 			var minWidthArray = minWidth.IntArray();
 			var table = new StringTable(maxWidthArray.Select(x=>x.ToString()));
 			for (var i = 0; i < table.Columns.Length; i++) {
-				table.Columns[i].SetMaxWidth(maxWidthArray[i]);
+				table.Columns[i].SetMaxTextWidth(maxWidthArray[i]);
 				table.Columns[i].MinWidth = minWidthArray[i];
 			}
 			table.AdjustColumnWidth(limit);

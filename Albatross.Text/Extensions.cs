@@ -69,5 +69,12 @@ namespace Albatross.Text {
 			}
 			return decimalText;
 		}
+
+		public static string MarkdownLink(string text, string url) {
+			return $"[{text}]({url})";
+		}
+		public static string SlackLink(string text, string url) {
+			return $"<{url}|{text}>";
+		}
 	}
 }
