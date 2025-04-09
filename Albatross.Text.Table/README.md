@@ -5,7 +5,7 @@ Convert collection of objects into a tabular string format with fluent interface
 * [StringTable](./StringTable.cs) class - A class that stores tablular data in string format and provides methods to print the data to a `TextWriter` with a width limitation and truncate behavior.
 * [TableOptions<>](./TableOptions.cs) class - An immutable class that contain configuration data that is used to convert instances of `IEnumerable<T>` into tabular text format.
 * [TableOptionFactory](./TableOptionFactory.cs) - A threas safe factory class that contains the registrations of `TableOptions<>` as a dictionary of `Dictionary<TypeOfT, TableOptions<T>>`
-* [TableOptionBuilder](./TableOptionBuilder.cs) - A builder class that can be used to create the `TableOptions` class using a fluient interface.
+* [TableOptionBuilder](./TableOptionBuilder.cs) - A builder class that can be used to create the `TableOptions` class using a fluent interface.
 
 ## How it works
 The generic class [TableOptions\<T>](./TableOptions.cs) contains the configuration of transformation from type T to string.  The instance of [TableOptions\<T>](./TableOptions.cs) is immutable, therefore thread safe.  It can be declared manually, althrough it would be easier to create using a [TableOptionBuilder<>](./TableOptionBuilder.cs).
