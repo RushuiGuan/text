@@ -1,15 +1,13 @@
-﻿#pragma warning disable CS0618 // Type or member is obsolete
-using Albatross.Text;
+﻿using Albatross.Text.Table;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Albatross.Test.Text {
 	public class TestPrint {
 		public class Product {
 			public string Name { get; set; }
-			public string? Cateogry { get; set; }
+			public string? Category { get; set; }
 			public int Weight { get; set; }
 			public DateTime CreatedDateTime { get; set; }
 			public DateTime Expired { get; set; }
@@ -22,7 +20,7 @@ namespace Albatross.Test.Text {
 			return new Product[] {
 				new Product("apple") {
 					Weight = 1000,
-					Cateogry = "fruits",
+					Category = "fruits",
 					CreatedDateTime = new DateTime(2000, 1,1, 23,1,50),
 					Expired = new DateTime(2000, 7,1).AddDays(1),
 				},
@@ -33,92 +31,123 @@ namespace Albatross.Test.Text {
 				},
 				new Product("desk") {
 					Weight = 200,
-					Cateogry = "furniture",
+					Category = "furniture",
 					CreatedDateTime = new DateTime(2000, 2,1, 5,5,4),
 					Expired = new DateTime(2000, 7,1).AddDays(3),
 				}
 			};
 		}
-		const string expectedPrintPropertiesDefaultOptions =
-@"           Name apple                 orange                desk                 
-       Cateogry fruits                                      furniture            
-         Weight 1000                  800                   200                  
-CreatedDateTime 2000-01-01 23:01:50-5 2000-07-01 02:03:03-4 2000-02-01 05:05:04-5
-        Expired 2000-07-02            2000-07-03            2000-07-04           
-";
-		[Fact]
-		public async Task PrintPropertiesWithDefaultOptions() {
-			StringWriter writer = new StringWriter();
-			var products = GetProducts();
-			await writer.PrintProperties<Product>(products, new PrintOptionBuilder<PrintPropertiesOption>()
-				.Property(nameof(Product.Name), nameof(Product.Cateogry), nameof(Product.Weight), nameof(Product.CreatedDateTime), nameof(Product.Expired))
-				.Build());
-			Assert.Equal(expectedPrintPropertiesDefaultOptions, writer.ToString());
-		}
-
-		const string expectedPrintPropertiesWithHeaders =
-@"                My Product            His Product           Her Product          
----------------------------------------------------------------------------------
-           Name apple                 orange                desk                 
-       Cateogry fruits                                      furniture            
-         Weight 1000                  800                   200                  
-CreatedDateTime 2000-01-01 23:01:50-5 2000-07-01 02:03:03-4 2000-02-01 05:05:04-5
-        Expired 2000-07-02            2000-07-03            2000-07-04           
-";
-		[Fact]
-		public async Task PrintPropertiesWithHeader() {
-			StringWriter writer = new StringWriter();
-			var products = GetProducts();
-			await writer.PrintProperties<Product>(products, new PrintOptionBuilder<PrintPropertiesOption>()
-				.Property(nameof(Product.Name), nameof(Product.Cateogry), nameof(Product.Weight), nameof(Product.CreatedDateTime), nameof(Product.Expired))
-				.ColumnHeaderLineCharacter('-')
-				.ColumnHeader(args => {
-					switch (args) {
-						case 0:
-							return "My Product";
-						case 1:
-							return "His Product";
-						case 2:
-							return "Her Product";
-						default:
-							return null;
-					}
-				}).Build());
-			Assert.Equal(expectedPrintPropertiesWithHeaders, writer.ToString());
-		}
-
 		const string expectedPrintTableWithDefault =
-@"Name   Cateogry  Weight CreatedDateTime       Expired   
---------------------------------------------------------
-apple  fruits    1000   2000-01-01 23:01:50-5 2000-07-02
-orange           800    2000-07-01 02:03:03-4 2000-07-03
-desk   furniture 200    2000-02-01 05:05:04-5 2000-07-04
+@"
+Name   Category  Weight CreatedDateTime     Expired   
+------------------------------------------------------
+apple  fruits    1000   2000-01-01 23:01:50 2000-07-02
+orange           800    2000-07-01 02:03:03 2000-07-03
+desk   furniture 200    2000-02-01 05:05:04 2000-07-04
+------------------------------------------------------
 ";
 
 		[Fact]
-		public async Task PrintTableWithDefaultOptions() {
+		public void PrintTableWithDefaultOptions() {
 			StringWriter writer = new StringWriter();
 			var products = GetProducts();
-			await writer.PrintTable<Product>(products, new PrintOptionBuilder<PrintTableOption>()
-				.Property(nameof(Product.Name), nameof(Product.Cateogry), nameof(Product.Weight), nameof(Product.CreatedDateTime), nameof(Product.Expired))
-				.Build());
-			Assert.Equal(expectedPrintTableWithDefault, writer.ToString());
+			var builder = new TableOptionBuilder<Product>()
+				.SetColumn(x => x.Name)
+				.SetColumn(x => x.Category)
+				.SetColumn(x => x.Weight)
+				.SetColumn(x => x.CreatedDateTime)
+				.Format(x => x.CreatedDateTime, (_, value) => new TextValue($"{value:yyyy-MM-dd HH:mm:ss}"))
+				.SetColumn(x => x.Expired)
+				.Format(x => x.Expired, (_, value) => new TextValue($"{value:yyyy-MM-dd}"));
+
+			products.StringTable(builder.Build()).Print(writer);
+			Assert.Equal(expectedPrintTableWithDefault.TrimStart(), writer.ToString());
 		}
 
-		const string expectedPrintTableWithoutHeader =
-@"apple  fruits    1000 2000-01-01 23:01:50-5 2000-07-02
-orange           800  2000-07-01 02:03:03-4 2000-07-03
-desk   furniture 200  2000-02-01 05:05:04-5 2000-07-04
+		const string expectedPrintTableWithTruncate =
+		@"
+Name   Category  Weight CreatedDateTime     Expire
+--------------------------------------------------
+apple  fruits    1000   2000-01-01 23:01:50 2000-0
+orange           800    2000-07-01 02:03:03 2000-0
+desk   furniture 200    2000-02-01 05:05:04 2000-0
+--------------------------------------------------
 ";
+
 		[Fact]
-		public async Task PrintTableWithoutHeader() {
+		public void PrintTableWithTruncate() {
 			StringWriter writer = new StringWriter();
 			var products = GetProducts();
-			await writer.PrintTable<Product>(products, new PrintOptionBuilder<PrintTableOption>()
-				.Property(nameof(Product.Name), nameof(Product.Cateogry), nameof(Product.Weight), nameof(Product.CreatedDateTime), nameof(Product.Expired))
-				.PrintHeader(false).Build());
-			Assert.Equal(expectedPrintTableWithoutHeader, writer.ToString());
+			var builder = new TableOptionBuilder<Product>()
+				.SetColumn(x => x.Name)
+				.SetColumn(x => x.Category)
+				.SetColumn(x => x.Weight)
+				.SetColumn(x => x.CreatedDateTime)
+				.Format(x => x.CreatedDateTime, (_, value) => new TextValue($"{value:yyyy-MM-dd HH:mm:ss}"))
+				.SetColumn(x => x.Expired)
+				.Format(x => x.Expired, (_, value) => new TextValue($"{value:yyyy-MM-dd}"));
+
+			products.StringTable(builder.Build()).SetWidthLimit(50).Print(writer);
+			Assert.Equal(expectedPrintTableWithTruncate.TrimStart(), writer.ToString());
+		}
+
+		const string expectedPrintTableWithHiddenColumn =
+		@"
+Name   Weight Created
+---------------------
+apple  1000   2000-01
+orange 800    2000-07
+desk   200    2000-02
+---------------------
+";
+
+		[Fact]
+		public void PrintTableWithHiddenColumn() {
+			StringWriter writer = new StringWriter();
+			var products = GetProducts();
+			var builder = new TableOptionBuilder<Product>()
+				.SetColumn(x => x.Name)
+				.SetColumn(x => x.Category)
+				.SetColumn(x => x.Weight)
+				.SetColumn(x => x.CreatedDateTime)
+				.Format(x => x.CreatedDateTime, (_, value) => new TextValue($"{value:yyyy-MM-dd HH:mm:ss}"))
+				.SetColumn(x => x.Expired)
+				.Format(x => x.Expired, (_, value) => new TextValue($"{value:yyyy-MM-dd}"));
+
+			products.StringTable(builder.Build())
+				.SetColumn(x => x.Name == "Category", x => x.MinWidth = 0)
+				.SetWidthLimit(21).Print(writer);
+			Assert.Equal(expectedPrintTableWithHiddenColumn.TrimStart(), writer.ToString());
+		}
+		const string expectedPrintTableWithTruncatedColumn=
+		@"
+Name   Category  Weight CreatedDat Expi
+---------------------------------------
+apple  fruits    1000   2000-01-01 2000
+orange           800    2000-07-01 2000
+desk   furniture 200    2000-02-01 2000
+---------------------------------------
+";
+
+		[Fact]
+		public void PrintTableWithTruncatedColumn() {
+			StringWriter writer = new StringWriter();
+			var products = GetProducts();
+			var builder = new TableOptionBuilder<Product>()
+				.SetColumn(x => x.Name)
+				.SetColumn(x => x.Category)
+				.SetColumn(x => x.Weight)
+				.SetColumn(x => x.CreatedDateTime)
+				.Format(x => x.CreatedDateTime, (_, value) => new TextValue($"{value:yyyy-MM-dd HH:mm:ss}"))
+				.SetColumn(x => x.Expired)
+				.Format(x => x.Expired, (_, value) => new TextValue($"{value:yyyy-MM-dd}"));
+
+			products.StringTable(builder.Build())
+				.SetColumn(x => x.Name == "CreatedDateTime", x => x.MinWidth = 10)
+				.SetColumn(x => x.Name == "Expired", x => x.MinWidth = 4)
+				.SetWidthLimit(39)
+				.Print(writer);
+			Assert.Equal(expectedPrintTableWithTruncatedColumn.TrimStart(), writer.ToString());
 		}
 	}
 }
-#pragma warning restore CS0618 // Type or member is obsolete
