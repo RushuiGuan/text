@@ -112,7 +112,7 @@ namespace Albatross.Text.Table {
 		public StringTable Filter(string? column, Func<string, bool> predicate) {
 			int? columnIndex = null;
 			if (!string.IsNullOrEmpty(column)) {
-				var selected = columns.Where(x => x.Name == column).FirstOrDefault() ?? throw new ArgumentException($"{column} is not a valid colume");
+				var selected = columns.Where(x => x.Name == column).FirstOrDefault() ?? throw new ArgumentException($"{column} is not a valid column");
 				columnIndex = selected.Index;
 			}
 			var stringTable = new StringTable();
