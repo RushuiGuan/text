@@ -14,12 +14,14 @@ namespace Albatross.Text.Table {
 			return table;
 		}
 
-		public static StringTable PropertyTable<T>(this T instance) {
+		public static StringTable PropertyTable<T>(this T instance, StringTable? table = null) {
 			var dictionary = new Dictionary<string, object>();
 			Albatross.Reflection.Enumerations.Property(instance, null, null, dictionary);
 			const string PropertyColumn = "Property";
 			const string ValueColumn = "Value";
-			StringTable table = new StringTable(PropertyColumn, ValueColumn);
+			if (table == null) {
+				table = new StringTable(PropertyColumn, ValueColumn);
+			}
 			foreach (var item in dictionary) {
 				table.Add(new TextValue(item.Key), new TextValue(TextOptionBuilderExtensions.DefaultFormat(item.Value)));
 			}
