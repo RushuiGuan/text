@@ -1,4 +1,5 @@
-﻿using Albatross.Text.Table;
+﻿using Albatross.Testing;
+using Albatross.Text.Table;
 using FluentAssertions;
 using System.IO;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Albatross.Text.Test {
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0M };
 			var writer = new StringWriter();
 			new[] { obj }.MarkdownTable(writer, options);
-			writer.ToString().Should().Be("Id|Name|Value\r\n-|-|-\r\n1|name|1\r\n");
+			writer.ToString().Should().Be("Id|Name|Value\n-|-|-\n1|name|1\n");
 		}
 
 		[Fact]
@@ -39,7 +40,7 @@ namespace Albatross.Text.Test {
 			Assert.Equal(5, table.Columns[2].MaxTextWidth);
 			var writer = new StringWriter();
 			table.Print(writer);
-			writer.ToString().Should().Be("Id Name Value\r\n-------------\r\n1  name 1    \r\n-------------\r\n");
+			writer.ToString().Should().Be("Id Name Value\n-------------\n1  name 1    \n-------------\n");
 		}
 
 
@@ -58,7 +59,7 @@ namespace Albatross.Text.Test {
 			Assert.Equal(5, table.Columns[3].MaxTextWidth);
 			var writer = new StringWriter();
 			table.Print(writer);
-			writer.ToString().Should().Be("Markdown Id Name Value\r\n----------------------\r\n[Google](https://www.google.com)   1  name 1    \r\n----------------------\r\n");
+			writer.ToString().NormalizeLineEnding().Should().Be("Markdown Id Name Value\n----------------------\n[Google](https://www.google.com)   1  name 1    \n----------------------\n");
 		}
 	}
 }
