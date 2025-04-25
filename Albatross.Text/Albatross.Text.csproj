@@ -8,8 +8,8 @@
 		<PackageProjectUrl>$(RepositoryProjectRoot)/text/Albatross.Text</PackageProjectUrl>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Albatross.Reflection" Version="7.5.8" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+		<PackageReference Include="Albatross.Reflection" Version="7.5.9" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\icon.png">

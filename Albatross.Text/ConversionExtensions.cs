@@ -4,6 +4,13 @@ using System.Collections.Generic;
 
 namespace Albatross.Text {
 	public static class ConversionExtensions {
+		/// <summary>
+		/// Convert text to an object of the specified type.
+		/// </summary>
+		/// <param name="text"></param>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException"></exception>
 		public static object? Convert(this string? text, Type type) {
 			if (string.IsNullOrEmpty(text)) {
 				if (type == typeof(string)) {
@@ -33,18 +40,29 @@ namespace Albatross.Text {
 				case TypeCode.Decimal: return decimal.Parse(text);
 				case TypeCode.Boolean: return bool.Parse(text);
 				case TypeCode.Char: return text[0];
-			};
+			}
 			if (type.GetNullableValueType(out var valueType)) {
 				return Convert(text, valueType);
 #if NET6_0_OR_GREATER
 			} else if (type == typeof(DateOnly)) {
 				return DateOnly.Parse(text);
+			} else if (type == typeof(TimeOnly)) {
+				return TimeOnly.Parse(text);
 #endif
 			} else {
 				throw new NotSupportedException($"Cannot convert text \"{text}\" to type {type.Name}");
 			}
 		}
 
+		/// <summary>
+		/// Set the property value of an instance of type T using values from an instance of Dictionary<string, string>.
+		/// The keys of the dictionary should match the property names of the type.  The value of the dictionary is converted
+		/// to the type of the property using the <see cref="Convert(string?,System.Type)"/> method.
+		/// </summary>
+		/// <param name="dictionary"></param>
+		/// <param name="func"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public static T Convert<T>(this IDictionary<string, string> dictionary, Func<T> func) where T : notnull {
 			var obj = func();
 			Convert(dictionary, typeof(T), obj);

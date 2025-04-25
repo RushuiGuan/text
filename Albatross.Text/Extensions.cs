@@ -20,6 +20,16 @@ namespace Albatross.Text {
 			}
 		}
 
+		/// <summary>
+		/// Try to get the text from the line with the given delimiter.  The method can be called repeatedly on the same line
+		/// until the end of the line is reached.  This method is faster than using String.Split.  Good for parsing delimited text.
+		/// But does not handle escaped delimiters.
+		/// </summary>
+		/// <param name="line"></param>
+		/// <param name="delimiter"></param>
+		/// <param name="offset"></param>
+		/// <param name="text"></param>
+		/// <returns></returns>
 		public static bool TryGetText(this string line, char delimiter, ref int offset, [NotNullWhen(true)] out string? text) {
 			if (offset == line.Length + 1) {
 				text = null;

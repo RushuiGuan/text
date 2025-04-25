@@ -71,7 +71,7 @@ namespace Albatross.Text {
 		public static TextWriter WriteItems<T>(this TextWriter writer, IEnumerable<T?> items, string delimiter, Action<TextWriter, T>? action)
 			=> WriteItems(writer, items, delimiter, action, null, null);
 		/// <summary>
-		/// String.Join for TextWriter
+		/// Simlar to the string.Join method, this method will write a collection of values with the specified delimiter.  It is more performant than string.Join.
 		/// </summary>
 		/// <returns>Current text writer</returns>
 		public static TextWriter WriteItems<T>(this TextWriter writer, IEnumerable<T?> items, string delimiter, Action<TextWriter, T>? action = null, string? prefix = null, string? postfix = null) {
