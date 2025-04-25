@@ -34,7 +34,7 @@ else {
 }
 
 
-if (-not [System.IO.File]::Exists((Join $root, .projects)) {
+if (-not [System.IO.File]::Exists(Join $root, .projects) {
 	Write-Error ".projects file not found"
 }
 
@@ -48,7 +48,7 @@ if (-not $skipTest) {
 	# run the test projects
 	foreach ($item in $testProjects) {
 		"Testing $item";
-		dotnet test join($root, $item, $item.csproj) -c release
+		dotnet test (join $root, $item, $item.csproj) -c release
 		if ($LASTEXITCODE -ne 0) {
 			Write-Error "Test failed for $item"
 		}
@@ -81,7 +81,7 @@ if ($LASTEXITCODE -ne 0) {
 try {
 	# first clean up the artifacts folder
 	Write-Information "Cleaning up artifacts folder: $(Join $root, artifacts)";
-	if (-not [System.IO.Directory]::Exists((Join $root, artifacts))) {
+	if (-not [System.IO.Directory]::Exists(Join $root, artifacts)) {
 		New-Item -ItemType Directory -Path (Join $root, artifacts)
 	} else {
 		Get-ChildItem (Join $root, artifacts, *.nupkg) | Remove-Item -Force
