@@ -1,6 +1,7 @@
 ﻿using Albatross.Testing;
 using Albatross.Text.Table;
 using FluentAssertions;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -60,6 +61,16 @@ namespace Albatross.Text.Test {
 			var writer = new StringWriter();
 			table.Print(writer);
 			writer.ToString().NormalizeLineEnding().Should().Be("Markdown Id Name Value\n----------------------\n[Google](https://www.google.com)   1  name 1    \n----------------------\n");
+		}
+
+		[Fact]
+		public void TestDictionary() {
+			var dict = new Dictionary<string, string> {
+				{ "Key1", "Value1" },
+				{ "Key2", "Value2" },
+				{ "Key3", "Value3" }
+			};
+			dict.StringTable().PrintConsole();
 		}
 	}
 }
