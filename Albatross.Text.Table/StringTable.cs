@@ -108,11 +108,24 @@ namespace Albatross.Text.Table {
 				writer.WriteLine("-".PadRight(header.Length, '-'));
 			}
 		}
+		
+		public void PrintColumns(TextWriter writer, string[] selected, string delimiter) {
+			var list = new List<Column>();
+			foreach(string name in selected){
+				var column = this.columns.FirstOrDefault(c => c.Name == name)
+				             ?? throw new ArgumentException($"{name} is not a valid column");
+				list.Add(column);
+			}
+			foreach (var row in Rows) {
+				writer.WriteItems(list, delimiter, (w, c) => w.Write(row.Values[c.Index].Text))
+					.WriteLine();
+			}
+		}
 
 		public StringTable Filter(string? column, Func<string, bool> predicate) {
 			int? columnIndex = null;
 			if (!string.IsNullOrEmpty(column)) {
-				var selected = columns.Where(x => x.Name == column).FirstOrDefault() ?? throw new ArgumentException($"{column} is not a valid column");
+				var selected = columns.FirstOrDefault(x => x.Name == column) ?? throw new ArgumentException($"{column} is not a valid column");
 				columnIndex = selected.Index;
 			}
 			var stringTable = new StringTable();

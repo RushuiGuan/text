@@ -1,15 +1,11 @@
-﻿using Albatross.Text.Table;
-using AutoFixture;
+﻿using System.CommandLine.Parsing;
 
 namespace Sample {
-	internal class Program {
-		static void Main(string[] args) {
-			var builder = new TableOptionBuilder<Contact>().SetColumnsByReflection();
-			var options = new TableOptions<Contact>(builder);
-			var fixture = new Fixture();
-			var contacts = fixture.CreateMany<Contact>(20);
-			contacts.StringTable().PrintConsole();
-			contacts.First().PropertyTable().Print(Console.Out);
+	class Program {
+		static Task<int> Main(string[] args) {
+			return new MySetup().AddCommands()
+				.CommandBuilder.Build()
+				.InvokeAsync(args);
 		}
 	}
 }
