@@ -5,12 +5,15 @@ using System.Collections.Generic;
 namespace Albatross.Text {
 	public static class ConversionExtensions {
 		/// <summary>
-		/// Convert text to an object of the specified type.
+		/// Convert text to an object of the specified type.  When the text is null or empty, the method will return default for value types
+		/// and null for reference types except string.  If the type is string, it will return the text itself.  Note that this method will not
+		/// return Nullable&lt;T&gt; when the type is Nullable&lt;T&gt;, it will always return T.
 		/// </summary>
-		/// <param name="text"></param>
-		/// <param name="type"></param>
+		/// <param name="text">Input text</param>
+		/// <param name="type">Expected type</param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
+		/// <exception cref="FormatException"></exception>
 		public static object? Convert(this string? text, Type type) {
 			if (string.IsNullOrEmpty(text)) {
 				if (type == typeof(string)) {
@@ -55,7 +58,7 @@ namespace Albatross.Text {
 		}
 
 		/// <summary>
-		/// Set the property value of an instance of type T using values from an instance of Dictionary<string, string>.
+		/// Set the property value of an instance of type T using values from an instance of Dictionary&lt;string, string&gt;.
 		/// The keys of the dictionary should match the property names of the type.  The value of the dictionary is converted
 		/// to the type of the property using the <see cref="Convert(string?,System.Type)"/> method.
 		/// </summary>

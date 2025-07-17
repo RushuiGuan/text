@@ -15,7 +15,7 @@ namespace Albatross.Text {
 		}
 		public static bool EndsWith(this StringBuilder sb, char c) {
 			if (sb.Length >= 1) {
-				return sb[sb.Length - 1] == c;
+				return sb[^1] == c;
 			}
 			return false;
 		}

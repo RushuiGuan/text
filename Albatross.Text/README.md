@@ -1,4 +1,4 @@
-# Albatross.Text
+## About
 A string manipulation library
 
 ## Features
