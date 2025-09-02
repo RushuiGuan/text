@@ -1,5 +1,6 @@
 ﻿using Albatross.Reflection;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -56,7 +57,7 @@ namespace Albatross.Text.Table {
 		public static TableOptionBuilder<T> SetColumnsByReflection<T>(this TableOptionBuilder<T> builder) {
 			int index = 0;
 			foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
-				if(property.GetIndexParameters().Length >0) {
+				if (property.GetIndexParameters().Length > 0) {
 					// Skip indexers
 					continue;
 				}

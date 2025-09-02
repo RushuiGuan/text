@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,13 +15,22 @@ namespace Albatross.Text.Table {
 			return table;
 		}
 
-		public static StringTable PropertyTable<T>(this T instance, StringTable? table = null) {
+		public static StringTable StringTable(this IEnumerable items, Type type, TableOptions? options = null) {
+			options = options ?? TableOptionFactory.Instance.Get(type);
+			StringTable table = new StringTable(options.ColumnOptions.Select(x => x.Header));
+			foreach (var item in items) {
+				table.Add(options.GetValue(item));
+			}
+			return table;
+		}
+
+		public static StringTable PropertyTable(this object instance, string? path = null, StringTable? table = null) {
 			var dictionary = new Dictionary<string, object>();
-			Albatross.Reflection.Enumerations.Property(instance, null, null, dictionary);
-			const string PropertyColumn = "Property";
-			const string ValueColumn = "Value";
+			Albatross.Reflection.Enumerations.Property(instance, path, null, dictionary);
+			const string propertyColumn = "Property";
+			const string valueColumn = "Value";
 			if (table == null) {
-				table = new StringTable(PropertyColumn, ValueColumn);
+				table = new StringTable(propertyColumn, valueColumn);
 			}
 			foreach (var item in dictionary) {
 				table.Add(new TextValue(item.Key), new TextValue(TextOptionBuilderExtensions.DefaultFormat(item.Value)));

@@ -12,8 +12,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Albatross.Expression" Version="4.0.0-248.main" />
       <PackageReference Include="Albatross.Serialization.Json" Version="9.0.0" />
-      <PackageReference Include="Albatross.Serialization.Yaml" Version="9.0.0" />
+      <PackageReference Include="CsvHelper" Version="33.1.0" />
     </ItemGroup>
 
 </Project>
