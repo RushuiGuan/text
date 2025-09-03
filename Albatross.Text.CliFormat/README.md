@@ -14,7 +14,6 @@ A .NET library that provides flexible text formatting for CLI applications using
   - **First/Last** - Extract and display first/last N items from collections
 * **Flexible Data Access** - Built-in variable system with automatic property resolution
 * **Console Width Adaptation** - Automatically adjusts output to fit console width
-* **Type-Safe Operations** - Generic extension methods with compile-time type checking
 * **Custom Expression Parser** - Configurable parser supporting various literal types and operations
 
 ## Prerequisites
@@ -90,7 +89,7 @@ products.CliPrint("table(value, \"Name\", \"Price\")");
 products.CliPrint("csv(value, \"Name\", \"Price\")");
 
 // Compact CSV without headers
-products.CliPrint("compactcsv(value, \"Id\", \"Name\")");
+products.CliPrint("ccsv(value, \"Id\", \"Name\")");
 
 // JSON array format
 products.CliPrint("jsonarray(value)");
@@ -128,9 +127,6 @@ products.CliPrint("table(value)");
 
 // Property access through variables
 products.CliPrint("first(value, \"Name\", 1)");
-
-// JSON formatting with custom field selection
-products.CliPrint("json(first(value, null, 1))");
 ```
 
 ### Custom Parser Configuration
@@ -155,14 +151,14 @@ The library uses prefix notation for format expressions:
 | Operation | Syntax | Description |
 |-----------|--------|-------------|
 | `auto(value)` | Auto-detect format | Tables for collections, property lists for objects |
-| `table(collection, [columns...])` | Tabular output | Optional column selection |
-| `csv(collection, [columns...])` | CSV with headers | Optional column selection |
-| `compactcsv(collection, [columns...])` | CSV without headers | Optional column selection |
-| `list(collection, [column])` | Simple list | Optional single column filter |
-| `jsonarray(collection, [pointers...])` | JSON array | Optional JSON pointer field extraction |
-| `json(object)` | JSON object | Single object serialization |
-| `first(collection, [column], [count])` | First N items | Optional column and count |
-| `last(collection, [column], [count])` | Last N items | Optional column and count |
+| `table(value, [columns...])` | Tabular output | Optional column selection |
+| `csv(value, [columns...])` | CSV with headers | Optional column selection |
+| `compactcsv(value, [columns...])` | CSV without headers | Optional column selection |
+| `list(value, [column])` | Simple list | Optional single column filter |
+| `jsonarray(value, [pointers...])` | JSON array | Optional JSON pointer field extraction |
+| `json(value, [/pointer])` | JSON object | Single object serialization |
+| `first(value, [column], [count])` | First N items | Optional column and count |
+| `last(value, [column], [count])` | Last N items | Optional column and count |
 
 ### Variable Access
 
