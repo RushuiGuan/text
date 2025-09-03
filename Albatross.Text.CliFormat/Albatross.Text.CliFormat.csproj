@@ -4,6 +4,9 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Description>A library that prints text output based on the runtime format expression</Description>
+		<PackageProjectUrl>$(RepositoryProjectRoot)/Albatross.Text.CliFormat</PackageProjectUrl>
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Albatross.Text.Table\Albatross.Text.Table.csproj" />
