@@ -11,7 +11,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		protected override object Run(List<object> operands) {
 			var writer = new StringWriter();
 			var input = operands[0].ConvertToCollection(out var type);
-			var pointers = operands.Skip(1).Select(x => JsonPointer.Create(x.ConvertToString())).ToArray();
+			var pointers = operands.Skip(1).Select(x => JsonPointer.Parse(x.ConvertToString())).ToArray();
 			foreach (var item in input) {
 				if (pointers.Any()) {
 					var elem = JsonSerializer.SerializeToElement(item, type, FormattedJsonSerialization.Instance.Value);
@@ -30,7 +30,7 @@ namespace Albatross.Text.CliFormat.Operations {
 				}
 				writer.WriteLine();
 			}
-			return 0;
+			return writer.ToString();
 		}
 	}
 }

@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "json": {
+      "commandName": "Project",
+      "commandLineArgs": "test table -f json(value,/0)"
+    },
+    "json array": {
+      "commandName": "Project",
+      "commandLineArgs": "test table -f jsonarray(value)"
+    },
+    "property": {
+      "commandName": "Project",
+      "commandLineArgs": "test property --format property(value,\"name\")"
+    }
+  }
+}

@@ -12,12 +12,11 @@ namespace Albatross.Text.CliFormat.Operations {
 			if (operands.Count == 1) {
 				return JsonSerializer.Serialize(operands[0], FormattedJsonSerialization.Instance.Value);
 			} else {
-				var pointer = JsonPointer.Create(operands[1].ConvertToString());
+				var pointer = JsonPointer.Parse(operands[1].ConvertToString());
 				var doc = JsonSerializer.SerializeToElement(operands[0], FormattedJsonSerialization.Instance.Value);
 				var result = pointer.Evaluate(doc);
 				return JsonSerializer.Serialize(result, FormattedJsonSerialization.Instance.Value);
 			}
-			return 0;
 		}
 	}
 }
