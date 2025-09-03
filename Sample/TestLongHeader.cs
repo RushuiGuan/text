@@ -17,7 +17,7 @@ namespace Sample {
 			var fixture = new Fixture();
 			var contacts = fixture.CreateMany<Contact>(5);
 			var printOptions = new TableOptionBuilder<Contact>()
-				.SetColumnsByReflection()
+				.GetColumnBuildersByReflection()
 				.ColumnHeader("Age", () => "Age (Years)").Ignore(x => x.Address).Ignore(x => x.Email).Ignore(x => x.Phone)
 				.ColumnOrder("Name", () => 100)
 				.Build();

@@ -1,5 +1,5 @@
+using Albatross.Text.CliFormat;
 using Albatross.CommandLine;
-using Albatross.Text.Table;
 using AutoFixture;
 using Microsoft.Extensions.Options;
 using System.CommandLine.Invocation;
@@ -17,7 +17,7 @@ namespace Sample {
 		public override int Invoke(InvocationContext context) {
 			var fixture = new Fixture();
 			var contacts = fixture.CreateMany<Contact>(20);
-			contacts.StringTable().PrintConsole();
+			contacts.CliPrint(options.Format);
 			return 0;
 		}
 	}
