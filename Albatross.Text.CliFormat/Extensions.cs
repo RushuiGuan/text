@@ -4,7 +4,14 @@ using Albatross.Text.CliFormat.Operations;
 using Albatross.Text.Table;
 
 namespace Albatross.Text.CliFormat {
+	/// <summary>
+	/// Provides extension methods and utilities for CLI text formatting operations.
+	/// </summary>
 	public static class Extensions {
+		/// <summary>
+		/// Builds a custom expression parser configured with factories for various text formatting operations.
+		/// </summary>
+		/// <returns>A configured parser instance that can evaluate CLI format expressions.</returns>
 		public static IParser BuildCustomParser() {
 			var builder = new ParserBuilder();
 			builder.AddFactory(new BooleanLiteralFactory(false));
@@ -25,6 +32,12 @@ namespace Albatross.Text.CliFormat {
 			return new Parser(builder.Factories, false);
 		}
 
+		/// <summary>
+		/// Prints the specified value using a CLI format expression, with automatic format detection if no format is specified.
+		/// </summary>
+		/// <typeparam name="T">The type of the value to print.</typeparam>
+		/// <param name="value">The value to format and print to console output.</param>
+		/// <param name="format">The format expression to use. If null or empty, uses "auto(value)" for automatic format detection.</param>
 		public static void CliPrint<T>(this T value, string? format) where T : notnull {
 			if (string.IsNullOrEmpty(format)) {
 				format = "auto(value)";
