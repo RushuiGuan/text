@@ -4,13 +4,36 @@ using CsvHelper.Configuration;
 using System.Globalization;
 
 namespace Albatross.Text.CliFormat.Operations {
+	/// <summary>
+	/// Formats collections as CSV (comma-separated values) output with column headers.
+	/// Supports custom column selection through additional parameters.
+	/// </summary>
 	public class Csv : PrefixExpression {
+		/// <summary>
+		/// Initializes the Csv operation supporting one or more operands.
+		/// </summary>
 		public Csv() : base("csv", 1, int.MaxValue) {
 		}
 
+		/// <summary>
+		/// Executes CSV formatting with column headers.
+		/// </summary>
+		/// <param name="operands">The operands list where the first operand is the collection to format, and remaining operands specify column names.</param>
+		/// <returns>A CSV formatted string with column headers.</returns>
 		protected override object Run(List<object> operands) {
 			return Print(operands, true);
 		}
+		
+		/// <summary>
+		/// Generates CSV output from a collection with configurable header inclusion and column selection.
+		/// </summary>
+		/// <param name="operands">The operands list where the first operand is the collection to format, and remaining operands specify column names.</param>
+		/// <param name="showHeader">Indicates whether to include column headers in the output.</param>
+		/// <returns>A CSV formatted string with or without headers based on the showHeader parameter.</returns>
+		/// <remarks>
+		/// When no column parameters are provided, all public properties are included.
+		/// When column parameters are specified, only those properties are included in the specified order.
+		/// </remarks>
 		public static string Print(List<object> operands, bool showHeader) {
 			var items = operands[0].ConvertToCollection(out var type);
 			var parameters = operands.Skip(1).Select(x => x.ConvertToString()).ToArray();
