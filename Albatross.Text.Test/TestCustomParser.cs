@@ -21,5 +21,14 @@ namespace Albatross.Text.Test {
 			var parameters = prefix.Operands.Select(x=>x.Eval(_=>new object()).ConvertToString()).ToArray();
 			Assert.Equivalent(expectedParameters, parameters);
 		}
+
+		[Theory]
+		[InlineData("value", "value")]
+		[InlineData("value.a", "value.a")]
+		public void TestCustomVariableFactoryRegex_Success(string text, string expected) {
+			var match = CustomVariableFactory.VariableNameRegex.Match(text);
+			Assert.True(match.Success);
+			Assert.Equal(expected, match.Groups[1].Value);
+		}
 	}
 }

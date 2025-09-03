@@ -7,6 +7,7 @@ using System.CommandLine.Invocation;
 namespace Sample {
 	[Verb("test table", typeof(TestTable), Description = "Test command for demonstration purposes")]
 	public class TestTableOptions {
+		[Option("f", Description = "Output format")]
 		public string? Format { get; set; }
 	}
 
