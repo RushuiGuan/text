@@ -54,7 +54,26 @@ namespace Albatross.Text.Table {
 			}
 		}
 
-		public static TableOptionBuilder<T> SetColumnsByReflection<T>(this TableOptionBuilder<T> builder) {
+		public static IEnumerable<TableColumnOption> GetColumnsByReflection(this Type type) {
+			var list = new List<TableColumnOption>();
+			int index = 0;
+			foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
+				if (property.GetIndexParameters().Length > 0) {
+					// Skip indexers
+					continue;
+				}
+				int order = index++;
+				var columnOption = new TableColumnOption(x => property.GetValue(x), (_, value) => new TextValue(DefaultFormat(value))) {
+					Header = property.Name,
+					Order = order,
+					Property = property.Name,
+				};
+				list.Add(columnOption);
+			}
+			return list;
+		}
+		
+		public static TableOptionBuilder<T> GetColumnBuildersByReflection<T>(this TableOptionBuilder<T> builder) {
 			int index = 0;
 			foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
 				if (property.GetIndexParameters().Length > 0) {
@@ -64,7 +83,7 @@ namespace Albatross.Text.Table {
 				int order = index++;
 				builder.ColumnOptionBuilders[property.Name] = new TableColumnOptionBuilder<T> {
 					GetValueDelegate = x => property.GetValue(x),
-					Formatter = (T entity, object? value) => new TextValue(DefaultFormat(value)),
+					Formatter = (_, value) => new TextValue(DefaultFormat(value)),
 					GetHeader = () => property.Name,
 					GetOrder = () => order,
 				};

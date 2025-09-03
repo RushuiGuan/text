@@ -7,11 +7,11 @@ namespace Albatross.Text.Table {
 			Formatter = formatter;
 		}
 
-		public Func<object, object?> GetValueDelegate { get; set; }
-		public Func<object, object?, TextValue> Formatter { get; set; }
-		public required string Header { get; set; }
-		public required int Order { get; set; }
-		public required string Property { get; set; }
+		public Func<object, object?> GetValueDelegate { get; init; }
+		public Func<object, object?, TextValue> Formatter { get; init; }
+		public required string Header { get; init; }
+		public required int Order { get; init; }
+		public required string Property { get; init; }
 	}
 
 	public class TableColumnOption<T> : TableColumnOption {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Albatross.Reflection;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -25,8 +26,14 @@ namespace Albatross.Text.Table {
 		}
 
 		public static StringTable PropertyTable(this object instance, string? path = null, StringTable? table = null) {
+			object? target;
+			if (!string.IsNullOrEmpty(path)) {
+				target = instance.GetType().GetPropertyValue(instance, path, true);
+			} else {
+				target = instance;
+			}
 			var dictionary = new Dictionary<string, object>();
-			Albatross.Reflection.Enumerations.Property(instance, path, null, dictionary);
+			target.ToDictionary(dictionary);
 			const string propertyColumn = "Property";
 			const string valueColumn = "Value";
 			if (table == null) {
@@ -65,6 +72,13 @@ namespace Albatross.Text.Table {
 				var array = columns.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 				table.PrintColumns(System.Console.Out, array, ",");
 			}
+		}
+
+		public static string PrintConsoleWidth(this StringTable table) {
+			table.AdjustColumnWidth(GetConsoleWith());
+			var writer = new StringWriter();
+			table.Print(writer);
+			return writer.ToString();
 		}
 
 		public static int GetConsoleWith() {

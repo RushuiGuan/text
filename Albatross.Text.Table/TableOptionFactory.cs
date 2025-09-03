@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Albatross.Text.Table {
@@ -12,7 +13,7 @@ namespace Albatross.Text.Table {
 				if (registration.TryGetValue(typeof(T), out TableOptions? options)) {
 					return (TableOptions<T>)options;
 				} else {
-					var newOptions = new TableOptionBuilder<T>().SetColumnsByReflection().Build();
+					var newOptions = new TableOptionBuilder<T>().GetColumnBuildersByReflection().Build();
 					Register<T>(newOptions);
 					return newOptions;
 				}
@@ -24,23 +25,8 @@ namespace Albatross.Text.Table {
 				if (registration.TryGetValue(type, out TableOptions? options)) {
 					return options;
 				} else {
-					var columnOptions = new List<TableColumnOption>();
-					int index = 0;
-					foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
-						if (property.GetIndexParameters().Length > 0) {
-							// Skip indexers
-							continue;
-						}
-						int order = index++;
-						var columnOption = new TableColumnOption(x => property.GetValue(x), (_, value) => new TextValue(DefaultFormat(value))) {
-							Header = property.Name,
-							Order = order,
-							Property = property.Name,
-						};
-						columnOptions.Add(columnOption);
-					}
-					return new TableOptions {
-						ColumnOptions = columnOptions.ToArray()
+					return new TableOptions(type) {
+						ColumnOptions = type.GetColumnsByReflection().ToArray(),
 					};
 				}
 			}

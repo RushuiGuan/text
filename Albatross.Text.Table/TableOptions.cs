@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
 
 namespace Albatross.Text.Table {
 	public class TableOptions {
+		public TableOptions(Type type) {
+			this.Type = type;
+		}
+
+		public Type Type { get; }
 		public TableColumnOption[] ColumnOptions { get; init; } = [];
 		public string[] Headers => ColumnOptions.Select(x => x.Header).ToArray();
 
@@ -22,7 +23,7 @@ namespace Albatross.Text.Table {
 	}
 
 	public class TableOptions<T> : TableOptions {
-		public TableOptions(TableOptionBuilder<T> builder) {
+		public TableOptions(TableOptionBuilder<T> builder) : base(typeof(T)) {
 			var list = new List<TableColumnOption>();
 			foreach (var keyValue in builder.ColumnOptionBuilders) {
 				list.Add(new TableColumnOption<T>(keyValue.Value.GetValueDelegate, keyValue.Value.Formatter) {
