@@ -1,4 +1,6 @@
-Generate or update the README.md file for the Albatross.Text.Table project at the project root directory.
+Project: Albatross.Text
+
+Generate or update the .\Albatross.Text\README.md file.
 
 The README should include:
 - Project title and a short description of what the project does
