@@ -1,4 +1,4 @@
-Generate or update a README.md file for the Albatross.Text project at the project root directory.
+Generate or update the README.md file for the Albatross.Text project at the project root directory.
 
 The README should include:
 - Project title and a short description of what the project does
