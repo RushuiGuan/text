@@ -24,7 +24,7 @@ namespace Albatross.Text.Test {
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0M };
 			var writer = new StringWriter();
 			new[] { obj }.MarkdownTable(writer, options);
-			writer.ToString().Should().Be("Id|Name|Value\n-|-|-\n1|name|1\n");
+			writer.ToString().Replace("\r", "").Should().Be("Id|Name|Value\n-|-|-\n1|name|1\n");
 		}
 
 		[Fact]
@@ -41,7 +41,8 @@ namespace Albatross.Text.Test {
 			Assert.Equal(5, table.Columns[2].MaxTextWidth);
 			var writer = new StringWriter();
 			table.Print(writer);
-			writer.ToString().Should().Be("Id Name Value\n-------------\n1  name 1    \n-------------\n");
+			writer.ToString().Replace("\r", "")
+				.Should().Be("Id Name Value\n-------------\n1  name 1    \n-------------\n");
 		}
 
 
