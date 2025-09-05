@@ -15,6 +15,7 @@ dev-scripts.psm1
 *.userprefs
 
 # Build results
+dev-scripts/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
