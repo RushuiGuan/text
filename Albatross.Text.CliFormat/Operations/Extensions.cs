@@ -19,7 +19,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// </remarks>
 		public static IEnumerable<object> ConvertToCollection(this object input, out Type type) {
 			type = input.GetType();
-			if (type.GetCollectionElementType(out var elementType)) {
+			if (type.TryGetCollectionElementType(out var elementType)) {
 				type = elementType;
 				return ((IEnumerable)input).Cast<object>();
 			} else {

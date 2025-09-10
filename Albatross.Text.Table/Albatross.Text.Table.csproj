@@ -25,10 +25,6 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Albatross.Reflection" Version="8.0.0-23.main" />
-		<PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="4.12.0">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
+		<PackageReference Include="Albatross.Reflection" Version="8.0.0" />
 	</ItemGroup>
 </Project>
