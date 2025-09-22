@@ -26,8 +26,8 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonArray>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Table>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.List>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.First>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.Last>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.Take>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.TaskLast>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Auto>(false));
 			return new Parser(builder.Factories, false);
 		}

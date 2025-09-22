@@ -11,7 +11,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// <summary>
 		/// Initializes the Json operation supporting 1-2 operands.
 		/// </summary>
-		public Json() : base("json", 1, 2) {
+		public Json() : base("json", 1, 1) {
 		}
 
 		/// <summary>
@@ -20,14 +20,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// <param name="operands">The operands list containing the object to serialize and optionally a JSON pointer for data extraction.</param>
 		/// <returns>A formatted JSON string. If a JSON pointer is provided, returns only the extracted portion.</returns>
 		protected override object Run(List<object> operands) {
-			if (operands.Count == 1) {
-				return JsonSerializer.Serialize(operands[0], FormattedJsonSerialization.Instance.Value);
-			} else {
-				var pointer = JsonPointer.Parse(operands[1].ConvertToString());
-				var doc = JsonSerializer.SerializeToElement(operands[0], FormattedJsonSerialization.Instance.Value);
-				var result = pointer.Evaluate(doc);
-				return JsonSerializer.Serialize(result, FormattedJsonSerialization.Instance.Value);
-			}
+			return JsonSerializer.Serialize(operands[0], FormattedJsonSerialization.Instance.Value);
 		}
 	}
 }

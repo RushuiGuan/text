@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 	<PropertyGroup>
-		<Version>8.1.0-44.main+f3b7aea</Version>
+		<Version>8.1.0</Version>
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
-		<EnableWindowsTargeting>True</EnableWindowsTargeting>
 		<LangVersion>Latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<RepositoryUrl>https://github.com/RushuiGuan/text</RepositoryUrl>
