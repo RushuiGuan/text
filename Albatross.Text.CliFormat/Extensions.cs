@@ -21,14 +21,16 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new CustomVariableFactory());
 			builder.AddFactory(new JsonPointerLiteralFactory());
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Json>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonArray>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonProperty>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Csv>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.CompactCsv>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonArray>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.Auto>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Table>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.List>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.Take>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.TaskLast>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.Auto>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.First>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.Last>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.Property>(false));
 			return new Parser(builder.Factories, false);
 		}
 

@@ -1,6 +1,4 @@
-﻿using Albatross.Expression;
-using Albatross.Expression.Prefix;
-using Albatross.Reflection;
+﻿using Albatross.Expression.Prefix;
 using Albatross.Text.Table;
 
 namespace Albatross.Text.CliFormat.Operations {
@@ -12,7 +10,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// <summary>
 		/// Initializes the List operation supporting 1-2 operands.
 		/// </summary>
-		public List() : base("list", 1, 2) {
+		public List() : base("list", 1, 1) {
 		}
 
 		/// <summary>
@@ -22,11 +20,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// <returns>A multi-line string with each collection item on a separate line.</returns>
 		protected override object Run(List<object> operands) {
 			var list = operands[0].ConvertToCollection(out var type);
-			string? column = null;
-			if(operands.Count > 1) {
-				column = operands[1].ConvertToString();
-			}
-			return Print(list, type, null, column, false);
+			return Print(list, type);
 		}
 		
 		/// <summary>
@@ -42,26 +36,13 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// Primitive types and strings are displayed directly. Complex objects are rendered as property tables.
 		/// When a column is specified, only that property value is extracted and displayed.
 		/// </remarks>
-		public static object Print(IEnumerable<object> value, Type type, int? count, string? column, bool reversed) {
-			if (count.HasValue) {
-				if (reversed) {
-					value = value.TakeLast(count.Value);
-				} else {
-					value = value.TakeLast(count.Value);
-				}
-			}
+		public static object Print(IEnumerable<object> value, Type type) {
 			var writer = new StringWriter();
 			foreach (var item in value) {
-				var target = item;
-				if (!string.IsNullOrEmpty(column)) {
-					target = type.GetPropertyValue(item, column, true);
-				}
-				if (target == null) {
-					writer.AppendLine(string.Empty);
-				} else if (target.GetType().IsPrimitive || target is string) {
-					writer.AppendLine(target);
+				if (item.GetType().IsPrimitive || item is string) {
+					writer.AppendLine(item);
 				} else {
-					var stringTable = target.PropertyTable(null, null);
+					var stringTable = item.PropertyTable(null, null);
 					stringTable.Print(writer);
 				}
 			}
