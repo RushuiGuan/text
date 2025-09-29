@@ -2,6 +2,7 @@
 using Albatross.Expression.Prefix;
 using Albatross.Reflection;
 using System.Net.WebSockets;
+using Array = System.Array;
 
 namespace Albatross.Text.CliFormat.Operations {
 	/// <summary>
@@ -15,12 +16,16 @@ namespace Albatross.Text.CliFormat.Operations {
 		}
 
 		protected override object Run(List<object> operands) {
-			var value = operands[0].ConvertToCollection(out _);
+			var value = operands[0].ConvertToCollection(out var elementType);
 			int count = 1;
 			if (operands.Count > 1) {
 				count = operands[1].ConvertToInt();
 			}
-			return value.Take(count).ToArray();
+			var array = Array.CreateInstance(elementType, count);
+			for (int i = 0; i < count && i < value.Count; i++) {
+				array.SetValue(value[i], i);
+			}
+			return array;
 		}
 	}
 }

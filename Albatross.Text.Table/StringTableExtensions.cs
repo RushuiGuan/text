@@ -64,14 +64,9 @@ namespace Albatross.Text.Table {
 			return table;
 		}
 
-		public static void PrintConsole(this StringTable table, string? columns = null) {
-			if (string.IsNullOrEmpty(columns)) {
-				table.AdjustColumnWidth(GetConsoleWith());
-				table.Print(System.Console.Out);
-			} else {
-				var array = columns.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-				table.PrintColumns(System.Console.Out, array, ",");
-			}
+		public static void PrintConsole(this StringTable table) {
+			table.AdjustColumnWidth(GetConsoleWith());
+			table.Print(System.Console.Out);
 		}
 
 		public static string PrintConsoleWidth(this StringTable table) {

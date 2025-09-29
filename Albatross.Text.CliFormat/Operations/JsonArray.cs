@@ -9,15 +9,15 @@ namespace Albatross.Text.CliFormat.Operations {
 		}
 
 		protected override object Run(List<object> operands) {
-			var input = operands[0].ConvertToCollection(out var type);
-			var pointer = JsonPointer.Parse(operands[1].ConvertToString());
-			var result = new object[input.Length];
-			for(int i=0; i<input.Length; i++) {
-				var elem = JsonSerializer.SerializeToElement(input[i], type, FormattedJsonSerialization.Instance.Value);
+			var list = operands[0].ConvertToCollection(out var elementType);
+			var pointer = global::Json.Pointer.JsonPointer.Parse(operands[1].ConvertToString());
+			var result = new List<JsonElement?>();
+			foreach(var item in list){
+				var elem = JsonSerializer.SerializeToElement(item, elementType, FormattedJsonSerialization.Instance.Value);
 				var extracted = pointer.Evaluate(elem);
-				result[i] = extracted ?? JsonDocument.Parse("null").RootElement;
+				result.Add(extracted);
 			}
-			return result;
+			return JsonSerializer.SerializeToElement(result, FormattedJsonSerialization.Instance.Value);
 		}
 	}
 }

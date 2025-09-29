@@ -1,5 +1,6 @@
 ﻿using Albatross.Expression.Prefix;
 using Albatross.Text.Table;
+using System.Collections;
 
 namespace Albatross.Text.CliFormat.Operations {
 	/// <summary>
@@ -36,7 +37,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// Primitive types and strings are displayed directly. Complex objects are rendered as property tables.
 		/// When a column is specified, only that property value is extracted and displayed.
 		/// </remarks>
-		public static object Print(IEnumerable<object> value, Type type) {
+		public static object Print(IList value, Type type) {
 			var writer = new StringWriter();
 			foreach (var item in value) {
 				if (item.GetType().IsPrimitive || item is string) {

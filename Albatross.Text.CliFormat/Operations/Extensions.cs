@@ -17,13 +17,14 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// This method is essential for operations that need to handle both single objects and collections uniformly.
 		/// The type parameter provides the necessary type information for downstream formatting operations.
 		/// </remarks>
-		public static object[] ConvertToCollection(this object input, out Type type) {
+		public static IList ConvertToCollection(this object input, out Type type) {
 			type = input.GetType();
-			if (type.TryGetCollectionElementType(out var elementType)) {
+			if (type.TryGetGenericCollectionElementType(out var elementType)) {
 				type = elementType;
-				return ((IEnumerable)input).Cast<object>().ToArray();
+				var listType = typeof(List<>).MakeGenericType(elementType);
+				return (IList)Activator.CreateInstance(listType, input)!;
 			} else {
-				return [input];
+				return new List<object> { input };
 			}
 		}
 	}

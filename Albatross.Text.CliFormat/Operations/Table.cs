@@ -1,6 +1,7 @@
 ﻿using Albatross.Expression;
 using Albatross.Expression.Prefix;
 using Albatross.Text.Table;
+using Array = System.Array;
 
 namespace Albatross.Text.CliFormat.Operations {
 	/// <summary>
@@ -24,15 +25,12 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// When column parameters are specified, only those properties are included in the specified order.
 		/// </remarks>
 		protected override object Run(List<object> operands) {
-			var writer = new StringWriter();
-			var items = operands[0].ConvertToCollection(out var type);
-			if (operands.Count == 1) {
-				items.StringTable(type, null).Print(writer);
-			} else {
-				var columns = operands.Skip(1).Select(x => x.ConvertToString()).ToArray();
-				items.StringTable(type, null).PrintColumns(writer, columns, ",");
+			var items = operands[0].ConvertToCollection(out var elementType);
+			var columns = Array.Empty<string>();
+			if (operands.Count > 1) {
+				columns = operands.Skip(1).Select(x => x.ConvertToString()).ToArray();
 			}
-			return writer.ToString();
+			return items.StringTable(elementType, null).FilterColumns(columns);
 		}
 	}
 }

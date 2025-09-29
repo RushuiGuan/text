@@ -46,7 +46,7 @@ namespace Albatross.Text.CliFormat.Operations {
 				writer.WriteRecords(items);
 			} else {
 				var classMapType = typeof(CsvClassMap<>).MakeGenericType(type);
-				var classMap = (ClassMap)Activator.CreateInstance(classMapType, [parameters]);
+				var classMap = (ClassMap)Activator.CreateInstance(classMapType, [parameters])!;
 				using var writer = new CsvHelper.CsvWriter(textWriter, configuration, true);
 				writer.Context.RegisterClassMap(classMap!);
 				writer.WriteRecords(items);

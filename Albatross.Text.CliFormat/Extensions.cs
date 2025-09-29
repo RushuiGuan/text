@@ -1,7 +1,11 @@
 ﻿using Albatross.Expression;
 using Albatross.Expression.Parsing;
+using Albatross.Reflection;
+using Albatross.Serialization.Json;
 using Albatross.Text.CliFormat.Operations;
 using Albatross.Text.Table;
+using System.Collections;
+using System.Text.Json;
 
 namespace Albatross.Text.CliFormat {
 	/// <summary>
@@ -22,7 +26,7 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new JsonPointerLiteralFactory());
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Json>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonArray>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonProperty>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonPointer>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Csv>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.CompactCsv>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Auto>(false));
@@ -40,15 +44,27 @@ namespace Albatross.Text.CliFormat {
 		/// <typeparam name="T">The type of the value to print.</typeparam>
 		/// <param name="value">The value to format and print to console output.</param>
 		/// <param name="format">The format expression to use. If null or empty, uses "auto(value)" for automatic format detection.</param>
-		public static void CliPrint<T>(this T value, string? format) where T : notnull {
+		public static void CliPrint<T>(this TextWriter writer, T value, string? format) where T : notnull {
+			object result;
 			if (string.IsNullOrEmpty(format)) {
-				format = "auto(value)";
+				result = value;
+			} else {
+				var parser = BuildCustomParser();
+				var expr = parser.Build(format);
+				var context = new CustomExecutionContext<T>(parser);
+				result = expr.Eval(name => context.GetValue(name, value));
 			}
-			var parser = BuildCustomParser();
-			var expr = parser.Build(format);
-			var context = new CustomExecutionContext<T>(parser);
-			var result = expr.Eval(name => context.GetValue(name, value));
-			Console.Out.WriteLine(result.ConvertToString());
+			var type = result.GetType();
+			if (result is StringTable stringTable) {
+				stringTable.Print(writer);
+			} else if (type.TryGetGenericCollectionElementType(out var elementType)) {
+				stringTable = ((IEnumerable)result).StringTable(elementType);
+				stringTable.Print(writer);
+			} else if (result is JsonElement element) {
+				writer.WriteLine(JsonSerializer.Serialize(element, FormattedJsonSettings.Instance.Value));
+			} else {
+				writer.WriteLine(result.ConvertToString());
+			}
 		}
 	}
 }

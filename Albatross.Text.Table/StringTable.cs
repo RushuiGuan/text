@@ -11,8 +11,10 @@ namespace Albatross.Text.Table {
 				Index = index;
 				SetMaxTextWidth(name.Length);
 			}
+
 			public int Index { get; }
 			public string Name { get; }
+
 			/// <summary>
 			/// The maximum width of the text for this column
 			/// </summary>
@@ -24,23 +26,29 @@ namespace Albatross.Text.Table {
 					DisplayWidth = width;
 				}
 			}
+
 			/// <summary>
 			/// The minimum width of this column.  If set to 0, the column will be hidden
 			/// </summary>
 			public int MinWidth { get; set; } = int.MaxValue;
+
 			public int DisplayWidth { get; internal set; }
 			public int ActualWidth => DisplayWidth == 0 ? 0 : DisplayWidth + 1;
 			public bool AlignRight { get; set; }
+
 			public string GetText(TextValue value) {
 				return value.GetText(DisplayWidth, AlignRight);
 			}
 		}
+
 		public class Row {
 			public TextValue[] Values { get; }
+
 			public Row(params TextValue[] values) {
 				Values = values;
 			}
 		}
+
 		Column[] columns;
 		List<Row> rows = new List<Row>();
 
@@ -108,21 +116,27 @@ namespace Albatross.Text.Table {
 				writer.WriteLine("-".PadRight(header.Length, '-'));
 			}
 		}
-		
-		public void PrintColumns(TextWriter writer, string[] selected, string delimiter) {
-			var list = new List<Column>();
-			foreach(string name in selected){
-				var column = this.columns.FirstOrDefault(c => c.Name == name)
-				             ?? throw new ArgumentException($"{name} is not a valid column");
-				list.Add(column);
+
+		public StringTable FilterColumns(params string[] columns) {
+			if(columns.Length == 0) {
+				return this;
 			}
+			var stringTable = new StringTable();
+			var selectedColumns = this.columns
+				.Where(x => columns.Contains(x.Name, StringComparer.OrdinalIgnoreCase))
+				.Select(x => x with { })
+				.OrderBy(x => x.Index).ToArray();
+			
+			stringTable.columns = selectedColumns.Select((x, index) => new Column(x.Name, index)).ToArray();
+
 			foreach (var row in Rows) {
-				writer.WriteItems(list, delimiter, (w, c) => w.Write(row.Values[c.Index].Text))
-					.WriteLine();
+				var values = selectedColumns.Select(x => row.Values[x.Index]).ToArray();
+				stringTable.Add(values);
 			}
+			return stringTable;
 		}
 
-		public StringTable Filter(string? column, Func<string, bool> predicate) {
+		public StringTable FilterRows(string? column, Func<string, bool> predicate) {
 			int? columnIndex = null;
 			if (!string.IsNullOrEmpty(column)) {
 				var selected = columns.FirstOrDefault(x => x.Name == column) ?? throw new ArgumentException($"{column} is not a valid column");
@@ -131,14 +145,14 @@ namespace Albatross.Text.Table {
 			var stringTable = new StringTable();
 			stringTable.columns = columns.Select(x => x with { }).ToArray();
 			foreach (var row in Rows) {
-				if (Filter(columnIndex, row, predicate)) {
-					stringTable.rows.Add(row);
+				if (FilterRows(columnIndex, row, predicate)) {
+					stringTable.Add(row.Values);
 				}
 			}
 			return stringTable;
 		}
 
-		internal bool Filter(int? columnIndex, Row row, Func<string, bool> predicate) {
+		internal bool FilterRows(int? columnIndex, Row row, Func<string, bool> predicate) {
 			TextValue[] array;
 			if (columnIndex.HasValue) {
 				array = [row.Values[columnIndex.Value]];

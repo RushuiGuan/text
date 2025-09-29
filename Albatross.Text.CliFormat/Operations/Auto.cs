@@ -23,7 +23,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		protected override object Run(List<object> operands) {
 			var value = operands[0];
 			var type = value.GetType();
-			if (type.TryGetCollectionElementType(out var elementType)) {
+			if (type.TryGetGenericCollectionElementType(out var elementType)) {
 				return ((IEnumerable)value).StringTable(elementType).PrintConsoleWidth();
 			} else {
 				return value.PropertyTable().PrintConsoleWidth();
