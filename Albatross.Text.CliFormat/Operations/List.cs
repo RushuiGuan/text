@@ -1,6 +1,7 @@
-﻿using Albatross.Expression.Prefix;
-using Albatross.Text.Table;
-using System.Collections;
+﻿using Albatross.Expression;
+using Albatross.Expression.Prefix;
+using Albatross.Reflection;
+using System.Reflection;
 
 namespace Albatross.Text.CliFormat.Operations {
 	/// <summary>
@@ -11,7 +12,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// <summary>
 		/// Initializes the List operation supporting 1-2 operands.
 		/// </summary>
-		public List() : base("list", 1, 1) {
+		public List() : base("list", 1, 2) {
 		}
 
 		/// <summary>
@@ -20,34 +21,54 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// <param name="operands">The operands list: 1) collection, 2) optional column name for filtering.</param>
 		/// <returns>A multi-line string with each collection item on a separate line.</returns>
 		protected override object Run(List<object> operands) {
-			var list = operands[0].ConvertToCollection(out var type);
-			return Print(list, type);
-		}
-		
-		/// <summary>
-		/// Generates list output from a collection with optional filtering, count limiting, and order reversal.
-		/// </summary>
-		/// <param name="value">The collection to format as a list.</param>
-		/// <param name="type">The element type of the collection.</param>
-		/// <param name="count">Optional limit on the number of items to include.</param>
-		/// <param name="column">Optional property name to extract from each item instead of the full object.</param>
-		/// <param name="reversed">When true and count is specified, takes items from the end of the collection.</param>
-		/// <returns>A multi-line string where each line represents one collection item.</returns>
-		/// <remarks>
-		/// Primitive types and strings are displayed directly. Complex objects are rendered as property tables.
-		/// When a column is specified, only that property value is extracted and displayed.
-		/// </remarks>
-		public static object Print(IList value, Type type) {
-			var writer = new StringWriter();
-			foreach (var item in value) {
-				if (item.GetType().IsPrimitive || item is string) {
-					writer.AppendLine(item);
-				} else {
-					var stringTable = item.PropertyTable(null, null);
-					stringTable.Print(writer);
+			var list = operands[0].ConvertToCollection(out var elementType);
+			if (elementType == typeof(string) || elementType.IsPrimitive) {
+				return list;
+			} else {
+				var result = new List<Dictionary<string, object>>();
+				var path = operands.Count > 1 ? operands[1].ConvertToString() : null;
+				foreach (var item in list) {
+					var dictionary = new Dictionary<string, object>();
+					var instance = string.IsNullOrEmpty(path) ? item : elementType.GetPropertyValue(item, path, true);
+					instance.ToDictionary(dictionary);
+					result.Add(dictionary);
 				}
+				return result;
 			}
-			return writer.ToString();
 		}
 	}
+
+	// public static class TestExtensions {
+	// 	public static object? GetPropertyValue2(this Type type, object data, string name, bool ignoreCase) {
+	// 		var bindingFlag = BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty;
+	// 		if (ignoreCase) {
+	// 			bindingFlag = bindingFlag | BindingFlags.IgnoreCase;
+	// 		}
+	// 		var index = name.IndexOf('.');
+	// 		if (index == -1) {
+	// 			var property = type.GetProperty(name, bindingFlag) ?? throw new ArgumentException($"Property {name} is not found in type {type.Name}");
+	// 			return property.GetValue(data);
+	// 		} else {
+	// 			var firstProperty = name.Substring(0, index);
+	// 			var property = type.GetProperty(firstProperty, bindingFlag) ?? throw new ArgumentException($"Property {name} is not found in type {type.Name}");
+	// 			var value = property.GetValue(data);
+	// 			if (value != null) {
+	// 				var remainingProperty = name.Substring(index + 1);
+	// 				// use value.GetType() instead of property.PropertyType because property.PropertyType may be a base class of value
+	// 				return GetPropertyValue2(value.GetType(), value, remainingProperty, ignoreCase);
+	// 			} else {
+	// 				return null;
+	// 			}
+	// 		}
+	// 	}
+	// 	public static object Convert(this object source, string? path) {
+	// 		var collection = source.ConvertToCollection(out var elementType);
+	// 		if(!string.IsNullOrEmpty(path)) {
+	// 			foreach (var item in collection) {
+	// 				var value = elementType.GetPropertyValue(item, path, true);
+	// 			}
+	// 		}
+	// 	}
+	// }
 }
+

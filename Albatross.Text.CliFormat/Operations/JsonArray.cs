@@ -11,13 +11,13 @@ namespace Albatross.Text.CliFormat.Operations {
 		protected override object Run(List<object> operands) {
 			var list = operands[0].ConvertToCollection(out var elementType);
 			var pointer = global::Json.Pointer.JsonPointer.Parse(operands[1].ConvertToString());
-			var result = new List<JsonElement?>();
+			var array = new System.Text.Json.Nodes.JsonArray();
 			foreach(var item in list){
 				var elem = JsonSerializer.SerializeToElement(item, elementType, FormattedJsonSerialization.Instance.Value);
 				var extracted = pointer.Evaluate(elem);
-				result.Add(extracted);
+				array.Add(extracted);
 			}
-			return JsonSerializer.SerializeToElement(result, FormattedJsonSerialization.Instance.Value);
+			return JsonSerializer.SerializeToElement(array, FormattedJsonSerialization.Instance.Value);
 		}
 	}
 }

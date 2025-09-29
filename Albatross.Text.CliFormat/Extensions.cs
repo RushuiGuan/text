@@ -58,12 +58,18 @@ namespace Albatross.Text.CliFormat {
 			if (result is StringTable stringTable) {
 				stringTable.Print(writer);
 			} else if (type.TryGetGenericCollectionElementType(out var elementType)) {
-				stringTable = ((IEnumerable)result).StringTable(elementType);
-				stringTable.Print(writer);
+				if(elementType == typeof(string) || elementType.IsPrimitive) {
+					foreach(var item in (IEnumerable)result) {
+						writer.WriteLine(item);
+					}
+				} else {
+					stringTable = ((IEnumerable)result).StringTable(elementType);
+					stringTable.Print(writer);
+				}
 			} else if (result is JsonElement element) {
 				writer.WriteLine(JsonSerializer.Serialize(element, FormattedJsonSettings.Instance.Value));
 			} else {
-				writer.WriteLine(result.ConvertToString());
+				writer.WriteLine(result.ToString());
 			}
 		}
 	}
