@@ -35,6 +35,7 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new PrefixExpressionFactory<Operations.First>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Last>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Property>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.ArrayProperty>(false));
 			return new Parser(builder.Factories, false);
 		}
 
@@ -57,11 +58,15 @@ namespace Albatross.Text.CliFormat {
 			var type = result.GetType();
 			if (result is StringTable stringTable) {
 				stringTable.Print(writer);
+			} else if (result is IDictionary dictionary) {
+				dictionary.StringTable().Print(writer);
 			} else if (type.TryGetGenericCollectionElementType(out var elementType)) {
-				if(elementType == typeof(string) || elementType.IsPrimitive) {
-					foreach(var item in (IEnumerable)result) {
+				if (elementType == typeof(string) || elementType.IsPrimitive) {
+					foreach (var item in (IEnumerable)result) {
 						writer.WriteLine(item);
 					}
+				} else if (typeof(IDictionary).IsAssignableFrom(elementType)) {
+					PrintDictionaryList((IEnumerable<IDictionary>)result, writer);
 				} else {
 					stringTable = ((IEnumerable)result).StringTable(elementType);
 					stringTable.Print(writer);
@@ -70,6 +75,27 @@ namespace Albatross.Text.CliFormat {
 				writer.WriteLine(JsonSerializer.Serialize(element, FormattedJsonSettings.Instance.Value));
 			} else {
 				writer.WriteLine(result.ToString());
+			}
+		}
+
+		static void PrintDictionaryList(IEnumerable<IDictionary> list, TextWriter writer) {
+			StringTable? first = null;
+			var tables = new List<StringTable>();
+			foreach (var item in list) {
+				var table = item.StringTable();
+				tables.Add(table);
+				if (first == null) { 
+					first = table; 
+				} else {
+					first.Align(table, false);
+				}
+			}
+			foreach (var table in tables) {
+				if (table == first) {
+					table.Print(writer, true, true, false);
+				} else {
+					table.Print(writer, false, false, true);
+				}
 			}
 		}
 	}

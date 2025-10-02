@@ -1,0 +1,25 @@
+﻿using Albatross.Expression;
+using Albatross.Expression.Prefix;
+using Albatross.Reflection;
+using Array = System.Array;
+
+namespace Albatross.Text.CliFormat.Operations {
+	public class ArrayProperty : PrefixExpression {
+		public ArrayProperty() : base("arrayproperty", 2, 2) {
+		}
+
+		protected override object Run(List<object> operands) {
+			var list = operands[0].ConvertToCollection(out var elementType);
+			var property = operands[1].ConvertToString();
+
+			Array array = Array.CreateInstance(elementType.GetPropertyType(property, true), list.Count);
+			var index = 0;
+			foreach (var item in list) {
+				var value = elementType.GetPropertyValue(item, property, true);
+				array.SetValue(value, index);
+				index++;
+			}
+			return array;
+		}
+	}
+}

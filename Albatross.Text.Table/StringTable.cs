@@ -102,17 +102,21 @@ namespace Albatross.Text.Table {
 			}
 		}
 
-		public void Print(TextWriter writer) {
+		public void Print(TextWriter writer, bool printHeader = true, bool firstLineSeparator = true, bool lastLineSeparator = true) {
 			var visibleColumns = this.Columns.Where(x => x.DisplayWidth > 0).ToArray();
 			var header = string.Join(" ", visibleColumns.Select(x => x.GetText(new TextValue(x.Name))));
-			writer.WriteLine(header);
-			writer.WriteLine("-".PadRight(header.Length, '-'));
+			if (printHeader) {
+				writer.WriteLine(header);
+			}
+			if (firstLineSeparator) {
+				writer.WriteLine("-".PadRight(header.Length, '-'));
+			}
 			string? body = null;
 			foreach (var row in Rows) {
 				body = string.Join(" ", visibleColumns.Select(x => x.GetText(row.Values[x.Index])));
 				writer.WriteLine(body);
 			}
-			if (!string.IsNullOrEmpty(body)) {
+			if (lastLineSeparator) {
 				writer.WriteLine("-".PadRight(header.Length, '-'));
 			}
 		}

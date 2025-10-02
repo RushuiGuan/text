@@ -71,7 +71,7 @@ namespace Albatross.Text.Test {
 				{ "Key2", "Value2" },
 				{ "Key3", "Value3" }
 			};
-			dict.StringTable().PrintConsole();
+			dict.StringTable<KeyValuePair<string, string>>().PrintConsole();
 		}
 	}
 }

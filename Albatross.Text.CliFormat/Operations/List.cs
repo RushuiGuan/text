@@ -1,7 +1,7 @@
 ﻿using Albatross.Expression;
 using Albatross.Expression.Prefix;
 using Albatross.Reflection;
-using System.Reflection;
+using System.Collections;
 
 namespace Albatross.Text.CliFormat.Operations {
 	/// <summary>
@@ -33,42 +33,9 @@ namespace Albatross.Text.CliFormat.Operations {
 					instance.ToDictionary(dictionary);
 					result.Add(dictionary);
 				}
-				return result;
+				return result.Cast<IDictionary>().ToArray();
 			}
 		}
 	}
-
-	// public static class TestExtensions {
-	// 	public static object? GetPropertyValue2(this Type type, object data, string name, bool ignoreCase) {
-	// 		var bindingFlag = BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty;
-	// 		if (ignoreCase) {
-	// 			bindingFlag = bindingFlag | BindingFlags.IgnoreCase;
-	// 		}
-	// 		var index = name.IndexOf('.');
-	// 		if (index == -1) {
-	// 			var property = type.GetProperty(name, bindingFlag) ?? throw new ArgumentException($"Property {name} is not found in type {type.Name}");
-	// 			return property.GetValue(data);
-	// 		} else {
-	// 			var firstProperty = name.Substring(0, index);
-	// 			var property = type.GetProperty(firstProperty, bindingFlag) ?? throw new ArgumentException($"Property {name} is not found in type {type.Name}");
-	// 			var value = property.GetValue(data);
-	// 			if (value != null) {
-	// 				var remainingProperty = name.Substring(index + 1);
-	// 				// use value.GetType() instead of property.PropertyType because property.PropertyType may be a base class of value
-	// 				return GetPropertyValue2(value.GetType(), value, remainingProperty, ignoreCase);
-	// 			} else {
-	// 				return null;
-	// 			}
-	// 		}
-	// 	}
-	// 	public static object Convert(this object source, string? path) {
-	// 		var collection = source.ConvertToCollection(out var elementType);
-	// 		if(!string.IsNullOrEmpty(path)) {
-	// 			foreach (var item in collection) {
-	// 				var value = elementType.GetPropertyValue(item, path, true);
-	// 			}
-	// 		}
-	// 	}
-	// }
 }
 

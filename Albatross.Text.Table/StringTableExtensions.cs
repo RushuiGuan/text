@@ -25,6 +25,14 @@ namespace Albatross.Text.Table {
 			return table;
 		}
 
+		public static StringTable StringTable(this IDictionary dictionary) {
+			StringTable table = new StringTable("Key", "Value");
+			foreach (DictionaryEntry entry in dictionary) {
+				table.Add(new TextValue(TextOptionBuilderExtensions.DefaultFormat(entry.Key)), new TextValue(TextOptionBuilderExtensions.DefaultFormat(entry.Value)));
+			}
+			return table;
+		}
+		
 		public static StringTable PropertyTable(this object instance, string? path = null, StringTable? table = null) {
 			object? target;
 			if (!string.IsNullOrEmpty(path)) {
@@ -88,6 +96,22 @@ namespace Albatross.Text.Table {
 			var writer = new StringWriter();
 			table.Print(writer);
 			return writer.ToString();
+		}
+
+		public static void Align(this StringTable srcTable, StringTable other, bool useSourceWidth) {
+			if(srcTable.Columns.Length != other.Columns.Length) {
+				throw new ArgumentException("Cannot align tables with different number of columns");
+			}
+			for (int i = 0; i < srcTable.Columns.Length; i++) {
+				var srcColumn = srcTable.Columns[i];
+				var otherColumn = other.Columns[i];
+				if (useSourceWidth || otherColumn.DisplayWidth < srcColumn.DisplayWidth) {
+					otherColumn.DisplayWidth = srcColumn.DisplayWidth;
+				} else {
+					srcColumn.DisplayWidth = otherColumn.DisplayWidth;
+				}
+				otherColumn.AlignRight = srcColumn.AlignRight;
+			}
 		}
 	}
 }
