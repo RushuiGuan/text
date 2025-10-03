@@ -13,12 +13,12 @@ namespace Sample {
 
 		public DateOnly Dob => DateOnly.FromDateTime(DateTime.Today).AddDays(AgeInDays * -1);
 
-		public static Contact Random(Faker faker) {
+		public static Contact Create(Faker faker) {
 			return new Contact {
 				FirstName = faker.Name.FirstName(),
 				LastName = faker.Name.LastName(),
 				AgeInDays = faker.Random.Int(1, 100 * 365),
-				Address = Enumerable.Range(1, faker.Random.Int(1, 3)).Select(_ => Sample.Address.Random(faker)).ToArray(),
+				Address = Enumerable.Range(1, faker.Random.Int(1, 3)).Select(_ => Sample.Address.Create(faker)).ToArray(),
 				Email = Enumerable.Range(1, faker.Random.Int(1, 3)).Select(_ => faker.Internet.Email()).ToArray(),
 				Phone = Enumerable.Range(1, faker.Random.Int(1, 3)).Select(_ => faker.Phone.PhoneNumber()).ToArray(),
 				Scores = Enumerable.Range(1, faker.Random.Int(1, 3)).Select(_ => faker.Random.Int(0, 100)).ToArray(),

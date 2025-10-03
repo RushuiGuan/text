@@ -10,9 +10,13 @@ namespace Sample.UserCases {
 		}
 
 		public override int Invoke(InvocationContext context) {
-			var faker = new Faker();
-			var items = Enumerable.Range(0, 5).Select(x => Address.Random(faker)).ToArray();
-			this.writer.CliPrint(items, "jsonpointer(value, /0/street)");
+			var faker = new Faker() {
+				Random = new Bogus.Randomizer(12345)
+			};
+			var items = Enumerable.Range(0, 5).Select(x => Address.Create(faker)).ToArray();
+			var format = "jsonpointer(value, /0/street)";
+			this.writer.WriteLine("Format: " + format);
+			this.writer.CliPrint(items, format);
 			return 0;
 		}
 	}

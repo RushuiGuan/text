@@ -9,13 +9,13 @@ namespace Sample {
 		public required string Country { get; set; }
 
 
-		public static Address Random(Faker faker) {
+		public static Address Create(Faker faker) {
 			return new Address {
 				Street = faker.Address.StreetAddress(),
-				City   = faker.Address.City(),
-				State  = faker.Address.State(),
-				Zip    = faker.Address.ZipCode(),
-				Country= faker.Address.Country()
+				City = faker.Address.City(),
+				State = faker.Address.State(),
+				Zip = faker.Address.ZipCode(),
+				Country = faker.Address.Country()
 			};
 		}
 	}

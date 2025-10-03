@@ -9,9 +9,13 @@ namespace Sample.UserCases {
 		public TestElementPropertyWithInt(IOptions<TestUseCaseOptions> options) : base(options) {
 		}
 		public override int Invoke(InvocationContext context) {
-			var faker = new Faker();
-			var item = Enumerable.Range(1, 5).Select(x => Contact.Random(faker)).ToArray();
-			this.writer.CliPrint(item, "elem_property(value, ageInDays)");
+			var faker = new Faker() {
+				Random = new Bogus.Randomizer(12345)
+			};
+			var item = Enumerable.Range(1, 5).Select(x => Contact.Create(faker)).ToArray();
+			var format = "elem_property(value, ageInDays)";
+			this.writer.WriteLine("Format: " + format);
+			this.writer.CliPrint(item, format);
 			return 0;
 		}
 	}

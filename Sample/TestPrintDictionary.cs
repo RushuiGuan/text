@@ -10,7 +10,9 @@ namespace Sample {
 		}
 
 		public override int Invoke(InvocationContext context) {
-			var faker = new Faker("en");
+			var faker = new Faker("en") {
+				Random = new Randomizer(12345)
+			};
 			var dict = new Dictionary<int, string>();
 			for (int i = 0; i < options.Count; i++) {
 				dict[i] = faker.Person.FullName;

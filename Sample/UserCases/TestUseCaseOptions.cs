@@ -10,6 +10,8 @@ namespace Sample.UserCases {
 	[Verb("use-case dynamic-single-property", typeof(TestDynamicSingleProperty), Description = "Using the property command, the system will print a single value if the property is not a colleciton")]
 	[Verb("use-case table-array-property", typeof(TestTableArrayProperty), Description = "Table is the default command for collection value.  The command itself allows column selection")]
 	[Verb("use-case dictionary", typeof(TestDictionary), Description = "Should print key value pairs")]
+	[Verb("use-case chained-operations", typeof(TestChainedOperations), Description = "Test chaining operations")]
+	[Verb("use-case subset-operations", typeof(TestSubsetOperations), Description = "Test chaining operations")]
 	public class TestUseCaseOptions {
 	}
 }

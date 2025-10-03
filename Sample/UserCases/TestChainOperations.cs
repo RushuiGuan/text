@@ -4,8 +4,8 @@ using Microsoft.Extensions.Options;
 using System.CommandLine.Invocation;
 
 namespace Sample.UserCases {
-	public class TestTableArrayProperty : BaseHandler<TestUseCaseOptions> {
-		public TestTableArrayProperty(IOptions<TestUseCaseOptions> options) : base(options) {
+	public class TestChainedOperations : BaseHandler<TestUseCaseOptions> {
+		public TestChainedOperations(IOptions<TestUseCaseOptions> options) : base(options) {
 		}
 
 		public override int Invoke(InvocationContext context) {
@@ -13,7 +13,7 @@ namespace Sample.UserCases {
 				Random = new Bogus.Randomizer(12345)
 			};
 			var item = Enumerable.Range(1, 5).Select(x => Contact.Create(faker)).ToArray();
-			var format = "table(value, firstname, lastname)";
+			var format = "json(first(value))";
 			this.writer.WriteLine("Format: " + format);
 			this.writer.CliPrint(item, format);
 			return 0;

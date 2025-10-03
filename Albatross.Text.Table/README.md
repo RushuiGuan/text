@@ -5,12 +5,13 @@ A .NET library that converts collections of objects into tabular string format w
 ## Features
 
 * **[StringTable](./StringTable.cs)** - Core class that stores tabular data in string format and provides methods to print data to a `TextWriter` with width limitations and customizable truncation behavior
-* **[TableOptions\<T\>](./TableOptions.cs)** - Immutable, thread-safe configuration class that defines how to convert instances of `IEnumerable<T>` into tabular text format
+* **[TableOptions\<T\>](./TableOptions.cs)** - Configuration class that defines how to convert instances of `IEnumerable<T>` into tabular text format
 * **[TableOptionFactory](./TableOptionFactory.cs)** - Thread-safe factory class for managing and reusing `TableOptions<T>` instances with a global registry
-* **[TableOptionBuilder\<T\>](./TableOptionBuilder.cs)** - Fluent builder for creating `TableOptions<T>` instances with customizable column behavior
 * **Flexible Column Configuration** - Set custom headers, formatting, ordering, and data extraction for each column
 * **Console Width Adaptation** - Automatically adjusts table width to fit console or custom width constraints
 * **Text Truncation Control** - Configure truncation behavior individually for each column
+* **Markdown Table Support** - Export collections as markdown tables
+* **Dictionary and Array Support** - Built-in support for dictionaries and arrays
 
 ## Prerequisites
 
@@ -69,55 +70,85 @@ var products = new List<Product>
     new Product { Id = 2, Name = "Mouse", Price = 25.50m, Date = DateTime.Now.AddDays(-1) }
 };
 
-// Simple table output
-products.StringTable().PrintConsole();
+// Simple table output - uses reflection to build columns automatically
+products.StringTable().Print(Console.Out);
 ```
 
-### Custom Table Configuration with Fluent Builder
+### Manual Column Configuration
 
 ```csharp
-using Albatross.Text.Table;
+// Create table options with specific columns
+var options = new TableOptions<Product>()
+    .SetColumn(x => x.Id)
+    .SetColumn(x => x.Name) 
+    .SetColumn(x => x.Price);
 
-// Create custom table options
-var options = new TableOptionBuilder<Product>()
-    .GetColumnBuildersByReflection()
-    .Format("Price", "#,#0.00")                    // Format price column
-    .ColumnHeader("Name", "Product Name")          // Custom header
-    .ColumnOrder("Date", 1)                        // Set column order
-    .Ignore("Id")                                  // Hide Id column
-    .Build();
-
-// Use custom options
-products.StringTable(options).PrintConsole();
+var table = products.StringTable(options);
+table.Print(Console.Out);
 ```
 
-### Advanced Column Customization
+### Automatic Column Configuration with Reflection
 
 ```csharp
-var options = new TableOptionBuilder<Product>()
-    .GetColumnBuildersByReflection()
-    .SetColumn("Category", p => p.Name.Contains("Computer") ? "Electronics" : "Accessories")
-    .Format("Price", (product, value) => $"${value:N2}")
-    .ColumnHeader("Price", "Cost (USD)")
-    .ColumnOrder("Category", 0)  // Show category first
-    .Build();
+// Build columns automatically using reflection
+var options = new TableOptions<Product>()
+    .BuildColumnsByReflection()
+    .Cast<Product>();
 
-products.StringTable(options).PrintConsole();
+// Apply formatting and customization
+options.Format(x => x.Price, "C2")                    // Currency format
+       .ColumnHeader(x => x.Name, "Product Name")      // Custom header
+       .ColumnOrder(x => x.Date, -1);                  // Move Date to first position
+
+var table = products.StringTable(options);
+table.Print(Console.Out);
 ```
 
 ### Global Configuration with Factory
 
 ```csharp
-// Register table options globally
-var builder = new TableOptionBuilder<Product>()
-    .GetColumnBuildersByReflection()
-    .Format("Price", "#,#0.00")
-    .Ignore("Id");
+// Register table options globally for reuse
+var options = new TableOptions<Product>()
+    .BuildColumnsByReflection()
+    .Cast<Product>()
+    .Format(x => x.Price, "C2");
 
-TableOptionFactory.Instance.Register(builder);
+TableOptionFactory.Instance.Register(options);
 
 // Use registered options anywhere in your application
-products.StringTable().PrintConsole(); // Uses registered options automatically
+products.StringTable().Print(Console.Out); // Uses registered options automatically
+```
+
+### Dictionary and Array Support
+
+```csharp
+// Dictionary tables
+var dict = new Dictionary<string, string> {
+    { "Key1", "Value1" },
+    { "Key2", "Value2" }
+};
+dict.StringTable().Print(Console.Out);
+
+// String array tables  
+var array = new string[] { "Item1", "Item2", "Item3" };
+array.StringTable().Print(Console.Out);
+```
+
+### Markdown Table Export
+
+```csharp
+// Export as markdown table
+var options = new TableOptions<Product>()
+    .SetColumn(x => x.Id)
+    .SetColumn(x => x.Name)
+    .SetColumn(x => x.Price);
+
+using var writer = new StringWriter();
+products.MarkdownTable(writer, options);
+Console.WriteLine(writer.ToString());
+// Output: Id|Name|Price
+//         -|-|-
+//         1|Laptop|999.99
 ```
 
 ### Width Control and Truncation
@@ -125,15 +156,15 @@ products.StringTable().PrintConsole(); // Uses registered options automatically
 ```csharp
 var table = products.StringTable();
 
-// Set custom width and column constraints
+// Set minimum width for specific columns
 table.MinWidth(col => col.Name == "Name", 15)      // Minimum width for Name column
      .MinWidth(col => col.Name == "Price", 10)     // Minimum width for Price column
-     .AdjustColumnWidth(80)                        // Total table width limit
-     .Print(Console.Out);
+     .AdjustColumnWidth(80);                       // Total table width limit
 
-// Print with custom width
-var customWidth = 60;
-table.AdjustColumnWidth(customWidth).PrintConsole();
+table.Print(Console.Out);
+
+// Right-align numeric columns
+table.AlignRight(col => col.Name == "Price", true);
 ```
 
 ## How it Works
@@ -141,26 +172,40 @@ table.AdjustColumnWidth(customWidth).PrintConsole();
 The library is built around a few key concepts:
 
 ### TableOptions\<T\> - Configuration Core
-The generic `TableOptions<T>` class contains the configuration for transforming type T to string-based tabular data. Each instance is immutable and thread-safe, making it suitable for concurrent applications.
+The generic `TableOptions<T>` class contains the configuration for transforming type T to string-based tabular data. It defines which columns to display, how to format values, and column ordering.
 
-### TableOptionBuilder\<T\> - Fluent Configuration
-The `TableOptionBuilder<T>` provides a fluent interface for creating table configurations:
-- **GetColumnBuildersByReflection()** - Automatically discovers properties via reflection
-- **Format()** - Define custom formatting for specific columns
-- **SetColumn()** - Custom data extraction functions
-- **ColumnHeader()** - Override column headers
-- **ColumnOrder()** - Control column display order
-- **Ignore()** - Hide specific columns
+Key methods:
+- **`SetColumn(x => x.Property)`** - Add a column using a property selector
+- **`BuildColumnsByReflection()`** - Automatically discover all public properties
+- **`Cast<T>()`** - Convert to strongly-typed options for fluent configuration
+- **`Format(x => x.Property, "format")`** - Apply string formatting to columns
+- **`ColumnHeader(x => x.Property, "Header")`** - Set custom column headers
+- **`ColumnOrder(x => x.Property, order)`** - Control column display order
 
 ### TableOptionFactory - Global Registry
 The `TableOptionFactory` class provides a thread-safe global registry for reusing table configurations across your application. It automatically creates default configurations when none are registered.
 
+```csharp
+// Register once, use everywhere
+TableOptionFactory.Instance.Register(myOptions);
+var table = myCollection.StringTable(); // Uses registered options
+```
+
 ### StringTable - Output Generation
 The `StringTable` class handles the actual table rendering with features like:
 - Automatic width calculation and adjustment
-- Text truncation with customizable behavior
+- Text truncation with customizable behavior  
 - Console width adaptation
 - Support for any `TextWriter` output
+- Column alignment control
+
+### Extension Methods
+The library provides convenient extension methods:
+- **`StringTable()`** - Convert collections to tables
+- **`MarkdownTable()`** - Export as markdown format
+- **`Print()`** - Output to any TextWriter
+- **`MinWidth()`** - Set column minimum widths
+- **`AlignRight()`** - Control column text alignment
 
 ## Project Structure
 
@@ -180,6 +225,33 @@ Albatross.Text.Table/
 └── README.md                          # Project documentation
 ```
 
+## API Reference
+
+### Core Classes
+
+- **`StringTable`** - Main table rendering class with width adjustment and formatting
+- **`TableOptions<T>`** - Configuration for converting objects to table format  
+- **`TableOptionFactory`** - Global registry for table configurations
+- **`TextValue`** - Represents formatted text with display width information
+- **`TableColumnOption`** - Individual column configuration
+
+### Key Extension Methods
+
+```csharp
+// Collection to table conversion
+IEnumerable<T>.StringTable(options?) -> StringTable
+IDictionary.StringTable() -> StringTable
+
+// Table output methods  
+StringTable.Print(TextWriter)
+StringTable.AdjustColumnWidth(int)
+StringTable.MinWidth(predicate, width)
+StringTable.AlignRight(predicate, align?)
+
+// Markdown export
+IEnumerable<T>.MarkdownTable(TextWriter, options?)
+```
+
 ## Running Tests
 
 The project includes comprehensive unit tests in the `Albatross.Text.Test` project:
@@ -195,13 +267,45 @@ dotnet test --verbosity normal
 dotnet test --framework net8.0
 ```
 
+### Test Coverage Examples
+
+The test project demonstrates various usage patterns:
+
+```csharp
+// Basic table creation (TestStringTable.cs)
+var options = new TableOptions<TestClass>()
+    .SetColumn(x => x.Id)
+    .SetColumn(x => x.Name)
+    .SetColumn(x => x.Value);
+
+var table = objects.StringTable(options);
+
+// Reflection-based column building (TestBuildingTableOptions.cs) 
+var options = new TableOptions<TestClass>()
+    .BuildColumnsByReflection()
+    .Cast<TestClass>()
+    .Format(x => x.Value, "0.00");
+
+// Column width adjustment (TestStringTableColumnAdjustment.cs)
+var table = new StringTable(headers);
+table.AdjustColumnWidth(80); // Fit in 80 characters
+
+// Dictionary and array tables (TestStringTable.cs)
+var dict = new Dictionary<string, string> { {"Key1", "Value1"} };
+dict.StringTable().Print(writer);
+
+var array = new string[] { "Value1", "Value2" };  
+array.StringTable().Print(writer);
+```
+
 Test coverage includes:
 - String table creation and formatting
-- Column width adjustment algorithms
+- Column width adjustment algorithms  
 - Text truncation behavior
-- TableOptions and factory functionality
+- TableOptions configuration and factory functionality
+- Markdown table generation
+- Dictionary and array table support
 - Edge cases and error handling
-- Performance scenarios
 
 ## Contributing
 

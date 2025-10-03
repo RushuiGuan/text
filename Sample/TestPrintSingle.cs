@@ -1,5 +1,6 @@
 using Albatross.CommandLine;
 using Albatross.Text.CliFormat;
+using Bogus;
 using Microsoft.Extensions.Options;
 using System.CommandLine.Invocation;
 
@@ -9,12 +10,14 @@ namespace Sample {
 		}
 
 		public override int Invoke(InvocationContext context) {
-			var faker = new Bogus.Faker("en");
+			var faker = new Bogus.Faker("en") {
+				Random = new Randomizer(12345)
+			};
 			if (typeof(T) == typeof(Contact)) {
-				var item = Contact.Random(faker);
+				var item = Contact.Create(faker);
 				this.writer.CliPrint(item, options.Format);
 			} else if (typeof(T) == typeof(Address)) {
-				var item = Address.Random(faker);
+				var item = Address.Create(faker);
 				this.writer.CliPrint(item, options.Format);
 			}
 			return 0;
