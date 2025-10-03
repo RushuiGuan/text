@@ -1,6 +1,5 @@
 using Albatross.CommandLine;
 using Albatross.Text.CliFormat;
-using AutoFixture;
 using Microsoft.Extensions.Options;
 using System.CommandLine.Invocation;
 
@@ -17,9 +16,14 @@ namespace Sample {
 		}
 
 		public override int Invoke(InvocationContext context) {
-			var fixture = new Fixture();
-			var item = fixture.Create<T>();
-			this.writer.CliPrint(item, options.Format);
+			var faker = new Bogus.Faker("en");
+			if (typeof(T) == typeof(Contact)) {
+				var item = Contact.Random(faker);
+				this.writer.CliPrint(item, options.Format);
+			} else if (typeof(T) == typeof(Address)) {
+				var item = Address.Random(faker);
+				this.writer.CliPrint(item, options.Format);
+			}
 			return 0;
 		}
 	}

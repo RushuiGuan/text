@@ -5,10 +5,6 @@ using System.Text.RegularExpressions;
 
 namespace Albatross.Text.Table {
 	public static class Extensions {
-		public static TableOptions<T> Register<T>(this TableOptionFactory factory, TableOptions<T> options) {
-			factory.Register(options);
-			return options;
-		}
 		public static void MarkdownTable<T>(this IEnumerable<T> items, TextWriter writer, TableOptions<T>? options = null) {
 			options = options ?? TableOptionFactory.Instance.Get<T>();
 			writer.WriteItems(options.Headers, "|").WriteLine();

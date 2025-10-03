@@ -1,6 +1,5 @@
 using Albatross.CommandLine;
 using Albatross.Text.CliFormat;
-using AutoFixture;
 using Bogus;
 using Microsoft.Extensions.Options;
 using System.CommandLine.Invocation;

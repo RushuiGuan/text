@@ -60,11 +60,7 @@ namespace Albatross.Text.CliFormat {
 			} else if (result is IDictionary dictionary) {
 				dictionary.StringTable().Print(writer);
 			} else if (type.TryGetGenericCollectionElementType(out var elementType)) {
-				if (elementType == typeof(string) || elementType.IsPrimitive) {
-					foreach (var item in (IEnumerable)result) {
-						writer.WriteLine(item);
-					}
-				} else if (typeof(IDictionary).IsAssignableFrom(elementType)) {
+				if (typeof(IDictionary).IsAssignableFrom(elementType)) {
 					PrintDictionaryList((IEnumerable<IDictionary>)result, writer);
 				} else {
 					var options = TableOptionFactory.Instance.Get(elementType);
