@@ -56,7 +56,9 @@ namespace Albatross.Text.CliFormat {
 				result = expr.Eval(name => context.GetValue(name, value));
 			}
 			var type = result.GetType();
-			if (result is StringTable stringTable) {
+			if (result is string text) {
+				writer.WriteLine(text);
+			} else if (result is StringTable stringTable) {
 				stringTable.Print(writer);
 			} else if (type.TryGetGenericCollectionElementType(out var elementType)) {
 				if (typeof(IDictionary).IsAssignableFrom(elementType)) {
@@ -68,7 +70,9 @@ namespace Albatross.Text.CliFormat {
 			} else if (result is JsonElement element) {
 				writer.WriteLine(JsonSerializer.Serialize(element, FormattedJsonSettings.Instance.Value));
 			} else {
-				writer.WriteLine(result.ToString());
+				var dictionary = new Dictionary<string, object>();
+				result.ToDictionary(dictionary);
+				dictionary.StringTable().Print(writer);
 			}
 		}
 
