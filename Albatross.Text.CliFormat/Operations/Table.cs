@@ -30,7 +30,8 @@ namespace Albatross.Text.CliFormat.Operations {
 			if (operands.Count > 1) {
 				columns = operands.Skip(1).Select(x => x.ConvertToString()).ToArray();
 			}
-			return items.StringTable(elementType, null).FilterColumns(columns);
+			var options = TableOptionFactory.Instance.Get(elementType);
+			return new StringTable(items, options).FilterColumns(columns);
 		}
 	}
 }

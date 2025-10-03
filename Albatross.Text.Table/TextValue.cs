@@ -10,6 +10,7 @@ namespace Albatross.Text.Table {
 	/// trancating text such as a mark down link.
 	/// </summary>
 	public record struct TextValue {
+		public static TextValue Empty { get; } = new TextValue(string.Empty);
 		public TextValue(string text, int textWidth, Func<string, int, string> truncate) {
 			Text = text;
 			TextWidth = textWidth;

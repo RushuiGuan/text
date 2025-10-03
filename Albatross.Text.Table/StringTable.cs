@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,12 +52,23 @@ namespace Albatross.Text.Table {
 
 		Column[] columns;
 		List<Row> rows = new List<Row>();
-
 		public Column[] Columns => columns;
 		public IEnumerable<Row> Rows => rows;
+		public bool PrintHeader { get; init; } = true;
+		public bool PrintFirstLineSeparator { get; init; } = true;
+		public bool PrintLastLineSeparator { get; init; } = true;
 
 		public StringTable(params IEnumerable<string> headers) {
 			columns = headers.Select((x, index) => new Column(x, index)).ToArray();
+		}
+
+		public StringTable(IEnumerable items, TableOptions options) : this(options.Build().Select(x => x.Header)) {
+			foreach (var item in items) {
+				this.AddRow(options.GetValue(item));
+			}
+			PrintHeader = options.PrintHeader;
+			PrintFirstLineSeparator = options.PrintFirstLineSeparator;
+			PrintLastLineSeparator = options.PrintLastLineSeparator;
 		}
 
 		public int TotalWidth => Columns.Sum(x => x.ActualWidth) - 1;
@@ -89,9 +101,9 @@ namespace Albatross.Text.Table {
 			}
 		}
 
-		public void Add(params IEnumerable<string> values) => this.Add(values.Select(x => new TextValue(x)));
+		public void AddRow(params IEnumerable<string> values) => this.AddRow(values.Select(x => new TextValue(x)));
 
-		public void Add(params IEnumerable<TextValue> values) {
+		public void AddRow(params IEnumerable<TextValue> values) {
 			var array = values.ToArray();
 			if (array.Length != columns.Length) {
 				throw new ArgumentException($"Table is expecting rows with {columns.Length} columns");
@@ -102,13 +114,13 @@ namespace Albatross.Text.Table {
 			}
 		}
 
-		public void Print(TextWriter writer, bool printHeader = true, bool firstLineSeparator = true, bool lastLineSeparator = true) {
+		public void Print(TextWriter writer, bool? printHeader = null, bool? printFirstLineSeparator = null, bool? printLastLineSeparator = null) {
 			var visibleColumns = this.Columns.Where(x => x.DisplayWidth > 0).ToArray();
 			var header = string.Join(" ", visibleColumns.Select(x => x.GetText(new TextValue(x.Name))));
-			if (printHeader) {
+			if (printHeader ?? this.PrintHeader) {
 				writer.WriteLine(header);
 			}
-			if (firstLineSeparator) {
+			if (printFirstLineSeparator ?? this.PrintFirstLineSeparator) {
 				writer.WriteLine("-".PadRight(header.Length, '-'));
 			}
 			string? body = null;
@@ -116,13 +128,13 @@ namespace Albatross.Text.Table {
 				body = string.Join(" ", visibleColumns.Select(x => x.GetText(row.Values[x.Index])));
 				writer.WriteLine(body);
 			}
-			if (lastLineSeparator) {
+			if (printLastLineSeparator ?? this.PrintLastLineSeparator) {
 				writer.WriteLine("-".PadRight(header.Length, '-'));
 			}
 		}
 
 		public StringTable FilterColumns(params string[] columns) {
-			if(columns.Length == 0) {
+			if (columns.Length == 0) {
 				return this;
 			}
 			var stringTable = new StringTable();
@@ -130,12 +142,12 @@ namespace Albatross.Text.Table {
 				.Where(x => columns.Contains(x.Name, StringComparer.OrdinalIgnoreCase))
 				.Select(x => x with { })
 				.OrderBy(x => x.Index).ToArray();
-			
+
 			stringTable.columns = selectedColumns.Select((x, index) => new Column(x.Name, index)).ToArray();
 
 			foreach (var row in Rows) {
 				var values = selectedColumns.Select(x => row.Values[x.Index]).ToArray();
-				stringTable.Add(values);
+				stringTable.AddRow(values);
 			}
 			return stringTable;
 		}
@@ -150,7 +162,7 @@ namespace Albatross.Text.Table {
 			stringTable.columns = columns.Select(x => x with { }).ToArray();
 			foreach (var row in Rows) {
 				if (FilterRows(columnIndex, row, predicate)) {
-					stringTable.Add(row.Values);
+					stringTable.AddRow(row.Values);
 				}
 			}
 			return stringTable;

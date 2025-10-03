@@ -1,12 +1,7 @@
-﻿using Albatross.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Xunit;
 
-namespace Albatross.Test.Text {
+namespace Albatross.Text.Test {
 	public class TestStringBuilderExtensions {
 		[Theory]
 		[InlineData("", "", true)]

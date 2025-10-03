@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -9,35 +10,54 @@ namespace Albatross.Text.Table {
 		Dictionary<Type, TableOptions> registration = new Dictionary<Type, TableOptions>();
 
 		public TableOptions<T> Get<T>() {
+			var type = typeof(T);
 			lock (sync) {
-				if (registration.TryGetValue(typeof(T), out TableOptions? options)) {
-					return (TableOptions<T>)options;
-				} else {
-					var newOptions = new TableOptionBuilder<T>().GetColumnBuildersByReflection().Build();
-					Register<T>(newOptions);
-					return newOptions;
+				if(!registration.TryGetValue(type, out var options)) {
+					if (!TrySimpleValueCollectionRegistration<T>(out options)){
+						options = FallBackRegistration<T>();
+					}
+					registration[typeof(T)] = options;
 				}
+				return (TableOptions<T>)options;
 			}
 		}
 
 		public TableOptions Get(Type type) {
-			lock (sync) {
-				if (registration.TryGetValue(type, out TableOptions? options)) {
-					return options;
-				} else {
-					return new TableOptions(type) {
-						ColumnOptions = type.GetColumnsByReflection().ToArray(),
-					};
-				}
-			}
+			var methodInfo = typeof(TableOptionFactory).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+				.First(m => m.IsGenericMethod && m.Name == nameof(Get) && m.GetParameters().Length == 0)
+				.MakeGenericMethod(type);
+			return (TableOptions)methodInfo.Invoke(this, [])!;
 		}
-		
 		public static TableOptionFactory Instance { get; } = new TableOptionFactory();
 		public void Register<T>(TableOptions<T> options) => Register((TableOptions)options);
 		public void Register(TableOptions options) {
 			lock (sync) {
 				registration[options.Type] = options;
 			}
+		}
+
+		internal bool TrySimpleValueCollectionRegistration<T>([NotNullWhen(true)] out TableOptions? options) {
+			var type = typeof(T);
+			if(type == typeof(string) || type.IsPrimitive 
+			                          || type == typeof(DateTime) 
+			                          || type == typeof(DateOnly)
+			                          || type == typeof(TimeOnly)
+			                          || type == typeof(DateTimeOffset)
+			                          || type == typeof(Guid)){
+				options = new TableOptions<T>()
+					.SetColumn("Value", x => x)
+					.PrintFirstLineSeparator(false)
+					.PrintLastLineSeparator(false)
+					.PrintHeader(false);
+				return true;
+			} else {
+				options = null;
+				return false;
+			}
+		}
+
+		internal TableOptions FallBackRegistration<T>() {
+			return new TableOptions<T>().BuildColumnsByReflection();
 		}
 	}
 }

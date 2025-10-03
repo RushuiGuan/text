@@ -24,7 +24,7 @@ namespace Albatross.Text.Test {
 		public void TestColumnMaxWidthSetting(string column, params string[] data) {
 			var table = new StringTable([column]);
 			foreach (var row in data) {
-				table.Add([row]);
+				table.AddRow([row]);
 			}
 			Assert.Equal(data.Union([column]).Max(x => x.Length), table.Columns[0].MaxTextWidth);
 		}

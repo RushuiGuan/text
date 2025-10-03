@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using Xunit;
 
-namespace Albatross.Test.Text {
+namespace Albatross.Text.Test {
 	public class TestPrint {
 		public class Product {
 			public string Name { get; set; }
@@ -51,7 +51,7 @@ desk   furniture 200    2000-02-01 05:05:04 2000-07-04
 		public void PrintTableWithDefaultOptions() {
 			StringWriter writer = new StringWriter();
 			var products = GetProducts();
-			var builder = new TableOptionBuilder<Product>()
+			var options = new TableOptions<Product>()
 				.SetColumn(x => x.Name)
 				.SetColumn(x => x.Category)
 				.SetColumn(x => x.Weight)
@@ -60,7 +60,7 @@ desk   furniture 200    2000-02-01 05:05:04 2000-07-04
 				.SetColumn(x => x.Expired)
 				.Format(x => x.Expired, (_, value) => new TextValue($"{value:yyyy-MM-dd}"));
 
-			products.StringTable(builder.Build()).Print(writer);
+			products.StringTable(options).Print(writer);
 			Assert.Equal(expectedPrintTableWithDefault.TrimStart(), writer.ToString());
 		}
 
@@ -78,7 +78,7 @@ desk   furniture 200    2000-02-01 05:05:04 2000-0
 		public void PrintTableWithTruncate() {
 			StringWriter writer = new StringWriter();
 			var products = GetProducts();
-			var builder = new TableOptionBuilder<Product>()
+			var options = new TableOptions<Product>()
 				.SetColumn(x => x.Name)
 				.SetColumn(x => x.Category)
 				.SetColumn(x => x.Weight)
@@ -87,7 +87,7 @@ desk   furniture 200    2000-02-01 05:05:04 2000-0
 				.SetColumn(x => x.Expired)
 				.Format(x => x.Expired, (_, value) => new TextValue($"{value:yyyy-MM-dd}"));
 
-			products.StringTable(builder.Build()).SetWidthLimit(50).Print(writer);
+			products.StringTable(options).SetWidthLimit(50).Print(writer);
 			Assert.Equal(expectedPrintTableWithTruncate.TrimStart(), writer.ToString());
 		}
 
@@ -105,7 +105,7 @@ desk   200    2000-02
 		public void PrintTableWithHiddenColumn() {
 			StringWriter writer = new StringWriter();
 			var products = GetProducts();
-			var builder = new TableOptionBuilder<Product>()
+			var options = new TableOptions<Product>()
 				.SetColumn(x => x.Name)
 				.SetColumn(x => x.Category)
 				.SetColumn(x => x.Weight)
@@ -114,8 +114,8 @@ desk   200    2000-02
 				.SetColumn(x => x.Expired)
 				.Format(x => x.Expired, (_, value) => new TextValue($"{value:yyyy-MM-dd}"));
 
-			products.StringTable(builder.Build())
-				.SetColumn(x => x.Name == "Category", x => x.MinWidth = 0)
+			products.StringTable(options)
+				.ChangeColumn(x => x.Name == "Category", x => x.MinWidth = 0)
 				.SetWidthLimit(21).Print(writer);
 			Assert.Equal(expectedPrintTableWithHiddenColumn.TrimStart(), writer.ToString());
 		}
@@ -133,7 +133,7 @@ desk   furniture 200    2000-02-01 2000
 		public void PrintTableWithTruncatedColumn() {
 			StringWriter writer = new StringWriter();
 			var products = GetProducts();
-			var builder = new TableOptionBuilder<Product>()
+			var options = new TableOptions<Product>()
 				.SetColumn(x => x.Name)
 				.SetColumn(x => x.Category)
 				.SetColumn(x => x.Weight)
@@ -142,9 +142,9 @@ desk   furniture 200    2000-02-01 2000
 				.SetColumn(x => x.Expired)
 				.Format(x => x.Expired, (_, value) => new TextValue($"{value:yyyy-MM-dd}"));
 
-			products.StringTable(builder.Build())
-				.SetColumn(x => x.Name == "CreatedDateTime", x => x.MinWidth = 10)
-				.SetColumn(x => x.Name == "Expired", x => x.MinWidth = 4)
+			products.StringTable(options)
+				.ChangeColumn(x => x.Name == "CreatedDateTime", x => x.MinWidth = 10)
+				.ChangeColumn(x => x.Name == "Expired", x => x.MinWidth = 4)
 				.SetWidthLimit(39)
 				.Print(writer);
 			Assert.Equal(expectedPrintTableWithTruncatedColumn.TrimStart(), writer.ToString());

@@ -29,7 +29,6 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonPointer>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Csv>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.CompactCsv>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.Auto>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Table>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.List>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.First>(false));
@@ -68,8 +67,8 @@ namespace Albatross.Text.CliFormat {
 				} else if (typeof(IDictionary).IsAssignableFrom(elementType)) {
 					PrintDictionaryList((IEnumerable<IDictionary>)result, writer);
 				} else {
-					stringTable = ((IEnumerable)result).StringTable(elementType);
-					stringTable.Print(writer);
+					var options = TableOptionFactory.Instance.Get(elementType);
+					new StringTable((IEnumerable)result, options).Print(writer);
 				}
 			} else if (result is JsonElement element) {
 				writer.WriteLine(JsonSerializer.Serialize(element, FormattedJsonSettings.Instance.Value));
@@ -84,8 +83,8 @@ namespace Albatross.Text.CliFormat {
 			foreach (var item in list) {
 				var table = item.StringTable();
 				tables.Add(table);
-				if (first == null) { 
-					first = table; 
+				if (first == null) {
+					first = table;
 				} else {
 					first.Align(table, false);
 				}

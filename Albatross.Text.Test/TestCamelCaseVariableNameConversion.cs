@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace Albatross.Text {
+namespace Albatross.Text.Test {
 	public class TestCamelCaseVariableNameConversion {
 
 		[Theory]

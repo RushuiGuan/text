@@ -8,7 +8,7 @@ namespace Albatross.Text.Test {
 		public void TestCreation() {
 			var type = typeof(List<string>);
 			var data = new string[] { "a", "b", "c" };
-			var collection = Activator.CreateInstance(type, data);
+			var collection = Activator.CreateInstance(type, [data]);
 			Assert.NotNull(collection);
 		}
 	}

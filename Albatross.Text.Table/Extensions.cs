@@ -5,15 +5,14 @@ using System.Text.RegularExpressions;
 
 namespace Albatross.Text.Table {
 	public static class Extensions {
-		public static TableOptions<T> Register<T>(this TableOptionFactory factory, TableOptionBuilder<T> builder) {
-			var options = new TableOptions<T>(builder);
+		public static TableOptions<T> Register<T>(this TableOptionFactory factory, TableOptions<T> options) {
 			factory.Register(options);
 			return options;
 		}
 		public static void MarkdownTable<T>(this IEnumerable<T> items, TextWriter writer, TableOptions<T>? options = null) {
 			options = options ?? TableOptionFactory.Instance.Get<T>();
 			writer.WriteItems(options.Headers, "|").WriteLine();
-			writer.WriteItems(options.ColumnOptions.Select(x => "-").ToArray(), "|").WriteLine();
+			writer.WriteItems(options.Build().Select(x => "-").ToArray(), "|").WriteLine();
 			foreach (var item in items) {
 				writer.WriteItems(options.GetValue(item).Select(x => x.Text), "|").WriteLine();
 			}

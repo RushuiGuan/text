@@ -16,24 +16,22 @@ namespace Albatross.Text.Test {
 		}
 		[Fact]
 		public void TestMarkdownTableConversion() {
-			var options = new TableOptionBuilder<TestClass>()
+			var options = new TableOptions<TestClass>()
 				.SetColumn(x => x.Id)
 				.SetColumn(x => x.Name)
-				.SetColumn(x => x.Value)
-				.Build();
+				.SetColumn(x => x.Value);
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0M };
 			var writer = new StringWriter();
 			new[] { obj }.MarkdownTable(writer, options);
-			writer.ToString().Replace("\r", "").Should().Be("Id|Name|Value\n-|-|-\n1|name|1\n");
+			writer.ToString().NormalizeLineEnding().Should().Be("Id|Name|Value\n-|-|-\n1|name|1\n");
 		}
 
 		[Fact]
 		public void TestStringTablePrinting() {
-			var options = new TableOptionBuilder<TestClass>()
+			var options = new TableOptions<TestClass>()
 				.SetColumn(x => x.Id)
 				.SetColumn(x => x.Name)
-				.SetColumn(x => x.Value)
-				.Build();
+				.SetColumn(x => x.Value);
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0M };
 			var table = new[] { obj }.StringTable(options);
 			Assert.Equal(2, table.Columns[0].MaxTextWidth);
@@ -41,18 +39,17 @@ namespace Albatross.Text.Test {
 			Assert.Equal(5, table.Columns[2].MaxTextWidth);
 			var writer = new StringWriter();
 			table.Print(writer);
-			writer.ToString().Replace("\r", "")
+			writer.ToString().NormalizeLineEnding()
 				.Should().Be("Id Name Value\n-------------\n1  name 1    \n-------------\n");
 		}
 
 
 		[Fact]
 		public void TestStringTablePrintingWithMismatchValueLength() {
-			var options = new TableOptionBuilder<TestClass>()
-				.GetColumnBuildersByReflection()
+			var options = new TableOptions<TestClass>()
+				.BuildColumnsByReflection().Cast<TestClass>()
 				.Format(x => x.Markdown, (e, v) => new TextValue("[Google](https://www.google.com)", "Google".Length, (_, size) => ""))
-				.ColumnOrder(x => x.Markdown, -1)
-				.Build();
+				.ColumnOrder(x => x.Markdown, -1);
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0M, Markdown = "Google" };
 			var table = new[] { obj }.StringTable(options);
 			Assert.Equal(8, table.Columns[0].MaxTextWidth);
@@ -71,7 +68,20 @@ namespace Albatross.Text.Test {
 				{ "Key2", "Value2" },
 				{ "Key3", "Value3" }
 			};
-			dict.StringTable<KeyValuePair<string, string>>().PrintConsole();
+			var writer = new StringWriter();
+			dict.StringTable().Print(writer);
+			writer.ToString().NormalizeLineEnding().Should().Be("Key  Value \n-----------\nKey1 Value1\nKey2 Value2\nKey3 Value3\n-----------\n");
+		}
+		[Fact]
+		public void TestStringArray() {
+			var array  = new string[]{
+				"Value1",
+				"Value2",
+				"Value3"
+			};
+			var writer = new StringWriter();
+			array.StringTable().Print(writer);
+			writer.ToString().NormalizeLineEnding().Should().Be("Value1\nValue2\nValue3\n");
 		}
 	}
 }
