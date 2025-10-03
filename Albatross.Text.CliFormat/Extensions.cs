@@ -34,7 +34,7 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new PrefixExpressionFactory<Operations.First>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Last>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Property>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.ArrayProperty>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.ElementProperty>(false));
 			return new Parser(builder.Factories, false);
 		}
 
@@ -57,8 +57,6 @@ namespace Albatross.Text.CliFormat {
 			var type = result.GetType();
 			if (result is StringTable stringTable) {
 				stringTable.Print(writer);
-			} else if (result is IDictionary dictionary) {
-				dictionary.StringTable().Print(writer);
 			} else if (type.TryGetGenericCollectionElementType(out var elementType)) {
 				if (typeof(IDictionary).IsAssignableFrom(elementType)) {
 					PrintDictionaryList((IEnumerable<IDictionary>)result, writer);
@@ -87,7 +85,7 @@ namespace Albatross.Text.CliFormat {
 			}
 			foreach (var table in tables) {
 				if (table == first) {
-					table.Print(writer, true, true, false);
+					table.Print(writer, true, true, true);
 				} else {
 					table.Print(writer, false, false, true);
 				}

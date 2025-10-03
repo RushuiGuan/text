@@ -1,6 +1,7 @@
 ﻿using Albatross.Expression;
 using Albatross.Expression.Prefix;
 using Albatross.Reflection;
+using Albatross.Text.Table;
 using System.Collections;
 
 namespace Albatross.Text.CliFormat.Operations {
@@ -22,7 +23,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// <returns>A multi-line string with each collection item on a separate line.</returns>
 		protected override object Run(List<object> operands) {
 			var list = operands[0].ConvertToCollection(out var elementType);
-			if (elementType == typeof(string) || elementType.IsPrimitive) {
+			if (elementType.IsSimpleValue()) {
 				return list;
 			} else {
 				var result = new List<Dictionary<string, object>>();
@@ -33,7 +34,7 @@ namespace Albatross.Text.CliFormat.Operations {
 					instance.ToDictionary(dictionary);
 					result.Add(dictionary);
 				}
-				return result.Cast<IDictionary>().ToArray();
+				return result.ToArray();
 			}
 		}
 	}

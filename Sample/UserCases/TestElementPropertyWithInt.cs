@@ -5,13 +5,13 @@ using Microsoft.Extensions.Options;
 using System.CommandLine.Invocation;
 
 namespace Sample.UserCases {
-	public class TestArrayPropertyWithDateOnly : BaseHandler<TestUseCaseOptions> {
-		public TestArrayPropertyWithDateOnly(IOptions<TestUseCaseOptions> options) : base(options) {
+	public class TestElementPropertyWithInt : BaseHandler<TestUseCaseOptions> {
+		public TestElementPropertyWithInt(IOptions<TestUseCaseOptions> options) : base(options) {
 		}
 		public override int Invoke(InvocationContext context) {
 			var faker = new Faker();
 			var item = Enumerable.Range(1, 5).Select(x => Contact.Random(faker)).ToArray();
-			this.writer.CliPrint(item, "arrayproperty(value, dob)");
+			this.writer.CliPrint(item, "elem_property(value, ageInDays)");
 			return 0;
 		}
 	}

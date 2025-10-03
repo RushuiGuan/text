@@ -4,8 +4,8 @@ using Albatross.Reflection;
 using Array = System.Array;
 
 namespace Albatross.Text.CliFormat.Operations {
-	public class ArrayProperty : PrefixExpression {
-		public ArrayProperty() : base("arrayproperty", 2, 2) {
+	public class ElementProperty : PrefixExpression {
+		public ElementProperty() : base("elem_property", 2, 2) {
 		}
 
 		protected override object Run(List<object> operands) {

@@ -38,12 +38,7 @@ namespace Albatross.Text.Table {
 
 		internal bool TrySimpleValueCollectionRegistration<T>([NotNullWhen(true)] out TableOptions? options) {
 			var type = typeof(T);
-			if(type == typeof(string) || type.IsPrimitive 
-			                          || type == typeof(DateTime) 
-			                          || type == typeof(DateOnly)
-			                          || type == typeof(TimeOnly)
-			                          || type == typeof(DateTimeOffset)
-			                          || type == typeof(Guid)){
+			if(type.IsSimpleValue()){
 				options = new TableOptions<T>()
 					.SetColumn("Value", x => x)
 					.PrintFirstLineSeparator(false)

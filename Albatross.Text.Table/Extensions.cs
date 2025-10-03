@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -15,6 +16,7 @@ namespace Albatross.Text.Table {
 		}
 
 		static Regex MarkdownLinkRegex = new Regex(@"\[(?<text>[^\]]+)\]\((?<url>[^)]+)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
 		public static string TruncateMarkdownLink(this string markdownLink, int displayWidth) {
 			if (displayWidth == 0) { return string.Empty; }
 			var match = MarkdownLinkRegex.Match(markdownLink);
@@ -30,7 +32,9 @@ namespace Albatross.Text.Table {
 				return markdownLink.Substring(0, displayWidth);
 			}
 		}
+
 		static Regex SlackLinkRegex = new Regex(@"<(?<url>[^|]+)\|(?<text>[^\>]+)>", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
 		public static string TruncateSlackLink(this string slackLink, int displayWidth) {
 			if (displayWidth == 0) { return string.Empty; }
 			var match = SlackLinkRegex.Match(slackLink);
@@ -46,6 +50,7 @@ namespace Albatross.Text.Table {
 				return slackLink.Substring(0, displayWidth);
 			}
 		}
+
 		public static string TruncateText(this string text, int displayWidth) {
 			if (displayWidth == 0) { return string.Empty; }
 			if (text.Length > displayWidth) {
@@ -54,5 +59,13 @@ namespace Albatross.Text.Table {
 				return text;
 			}
 		}
+
+		public static bool IsSimpleValue(this Type type) =>
+			type == typeof(string) || type.IsPrimitive
+			                       || type == typeof(DateTime)
+			                       || type == typeof(DateOnly)
+			                       || type == typeof(TimeOnly)
+			                       || type == typeof(DateTimeOffset)
+			                       || type == typeof(Guid);
 	}
 }

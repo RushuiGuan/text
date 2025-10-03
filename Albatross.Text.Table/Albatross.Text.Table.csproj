@@ -24,6 +24,6 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Albatross.Reflection" Version="8.0.1" />
+		<PackageReference Include="Albatross.Reflection" Version="8.0.4" />
 	</ItemGroup>
 </Project>

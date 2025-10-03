@@ -13,9 +13,9 @@ namespace Sample {
 			var faker = new Faker("en");
 			IEnumerable<T> items;
 			if (typeof(T) == typeof(Contact)) {
-				items = Enumerable.Range(1, options.Count).Select(_ => Contact.Random(faker)).Cast<T>();
+				items = Enumerable.Range(1, options.Count).Select(_ => Contact.Random(faker)).Cast<T>().ToArray();
 			}else if(typeof(T) == typeof(Address)) {
-				items = Enumerable.Range(1, options.Count).Select(_ => Address.Random(faker)).Cast<T>();
+				items = Enumerable.Range(1, options.Count).Select(_ => Address.Random(faker)).Cast<T>().ToArray();
 			}else {
 				throw new NotSupportedException($"Type {typeof(T).FullName} is not supported");
 			}
