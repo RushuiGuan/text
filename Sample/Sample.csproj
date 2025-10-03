@@ -12,6 +12,5 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Albatross.Text.CliFormat\Albatross.Text.CliFormat.csproj" />
-		<ProjectReference Include="..\Albatross.Text.Table\Albatross.Text.Table.csproj" />
 	</ItemGroup>
 </Project>
