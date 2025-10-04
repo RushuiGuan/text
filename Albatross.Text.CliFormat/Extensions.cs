@@ -45,7 +45,7 @@ namespace Albatross.Text.CliFormat {
 		/// <typeparam name="T">The type of the value to print.</typeparam>
 		/// <param name="value">The value to format and print to console output.</param>
 		/// <param name="format">The format expression to use. If null or empty, uses "auto(value)" for automatic format detection.</param>
-		public static void CliPrint<T>(this TextWriter writer, T value, string? format) where T : notnull {
+		public static TextWriter CliPrint<T>(this TextWriter writer, T value, string? format) where T : notnull {
 			object result;
 			if (string.IsNullOrEmpty(format)) {
 				result = value;
@@ -74,6 +74,7 @@ namespace Albatross.Text.CliFormat {
 				result.ToDictionary(dictionary);
 				dictionary.StringTable().Print(writer);
 			}
+			return writer;
 		}
 
 		static void PrintDictionaryList(IEnumerable<IDictionary> list, TextWriter writer) {
