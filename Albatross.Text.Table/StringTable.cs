@@ -139,7 +139,7 @@ namespace Albatross.Text.Table {
 			}
 			var stringTable = new StringTable();
 			var selectedColumns = this.columns
-				.Where(x => columns.Contains(x.Name, StringComparer.OrdinalIgnoreCase))
+				.Where(x => columns.Contains(x.Name, StringComparer.InvariantCulture))
 				.Select(x => x with { })
 				.OrderBy(x => x.Index).ToArray();
 

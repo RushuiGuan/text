@@ -3,6 +3,7 @@ using Albatross.Expression.Prefix;
 using Albatross.Reflection;
 using Albatross.Text.Table;
 using System.Collections;
+using Array = System.Array;
 
 namespace Albatross.Text.CliFormat.Operations {
 	/// <summary>
@@ -26,12 +27,27 @@ namespace Albatross.Text.CliFormat.Operations {
 			if (elementType.IsSimpleValue()) {
 				return list;
 			} else {
-				var result = new List<Dictionary<string, object>>();
 				var path = operands.Count > 1 ? operands[1].ConvertToString() : null;
+				if (!string.IsNullOrEmpty(path)) {
+					var propertyType = elementType.GetPropertyType(path, false);
+					Array array = Array.CreateInstance(propertyType, list.Count);
+					var index = 0;
+					foreach (var item in list) {
+						var value = elementType.GetPropertyValue(item, path, false);
+						array.SetValue(value, index);
+						index++;
+					}
+					if (propertyType.IsSimpleValue()) {
+						return array;
+					}
+					list = array;
+				}
+
+				var result = new List<Dictionary<string, object>>();
 				foreach (var item in list) {
 					var dictionary = new Dictionary<string, object>();
-					var instance = string.IsNullOrEmpty(path) ? item : elementType.GetPropertyValue(item, path, true);
-					instance.ToDictionary(dictionary);
+					//TODO: figure out what to do when the instance is simple value
+					item.ToDictionary(dictionary);
 					result.Add(dictionary);
 				}
 				return result.ToArray();

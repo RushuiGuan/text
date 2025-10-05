@@ -11,7 +11,7 @@ namespace Albatross.Text.CliFormat.Operations {
 			var value = operands[0];
 			var property = operands[1].ConvertToString();
 			var type = value.GetType();
-			return type.GetPropertyValue(value, property, true) ?? string.Empty;
+			return type.GetPropertyValue(value, property, false) ?? string.Empty;
 		}
 	}
 }

@@ -1,23 +1,17 @@
 # Albatross.Text.CliFormat
-
-A .NET library that provides flexible text formatting for CLI applications using runtime format expressions. Transform collections and objects into various output formats like tables, CSV, JSON, and custom layouts through a powerful expression-based system.
+A .NET library that provides flexible text formatting for CLI applications using runtime format expressions. Transform collections and objects into various output formats like tables, CSV, JSON, and custom layouts through a expression-based system.
 
 ## Features
-
-* **Expression-Based Formatting** - Use runtime format expressions to dynamically control output formatting
-* **Multiple Output Formats**:
-  - **Auto** - Automatically selects the best format (table for collections, property list for objects)
-  - **Table** - Tabular output with optional column selection
-  - **CSV/CompactCSV** - Comma-separated values with or without headers
-  - **JSON/JsonArray** - JSON serialization with optional field extraction using JSON pointers
-  - **List** - Simple line-by-line output with optional column filtering
-  - **First/Last** - Extract and display first/last N items from collections
-* **Flexible Data Access** - Built-in variable system with automatic property resolution
-* **Console Width Adaptation** - Automatically adjusts output to fit console width
-* **Custom Expression Parser** - Configurable parser supporting various literal types and operations
+- **Runtime Expression Formatting** - Transform data using expression strings like `"table(value, FirstName)"` or `"csv(first(value, 5))"`
+- **Auto-Detection** - Automatically formats collections as tables, objects as key-value pairs, and simple values as text
+- **Chainable Operations** - Combine operations like `"table(first(value, 2), Name, Age)"` for powerful data transformations
+- **Multiple Output Formats** - Built-in support for tables, CSV, JSON, key-value lists, and custom formats
+- **Deep Property Access** - Navigate nested objects with dot notation (`Address.Street`) and array indexing (`Emails[0]`)
+- **JSON Pointer Support** - Extract data using JSON pointer syntax (`/firstName`, `/addresses/0/street`)
+- **Collection Processing** - Extract properties from all collection elements with `collection_property` and `collection_jsonpointer`
+- **Flexible Table Customization** - Control column visibility, headers, and formatting via `TableOptionFactory`
 
 ## Prerequisites
-
 - .NET SDK 8.0 or later
 - Target framework: .NET 8.0
 - Dependencies:
@@ -25,460 +19,452 @@ A .NET library that provides flexible text formatting for CLI applications using
   - Albatross.Serialization.Json 9.0.0+
   - CsvHelper 33.1.0+
 
-## Installation
 
-### Package Manager
-```bash
-Install-Package Albatross.Text.CliFormat
-```
-
-### .NET CLI
-```bash
-dotnet add package Albatross.Text.CliFormat
-```
-
-### Build from Source
-```bash
-# Clone the repository
-git clone https://github.com/RushuiGuan/text.git
-cd text
-
-# Restore dependencies
-dotnet restore
-
-# Build the project
-dotnet build --configuration Release
-
-# Run tests
-dotnet test
-```
-
-## Example Usage
-
-### Quick Start - Auto Formatting
+## Entry Point
+The single entry point for this library is the extension method:
 
 ```csharp
-using Albatross.Text.CliFormat;
+TextWriter.CliPrint<T>(T value, string? format = null)
+```
 
-// Sample data class
-public class Product
+**Parameters:**
+- `value` - The input data to be formatted and printed
+- `format` - Optional expression string that controls output formatting (defaults to `"value"`)
+
+**How it works:**
+The shape of the output text is determined by both the type of input data and the format string you provide. When you call `CliPrint`, it:
+
+1. **Evaluates the format expression** using the built-in `value` variable that holds your input data
+2. **Auto-detects the appropriate output format** based on the result type:
+   - **Simple values** (string, primitives, DateTime, Guid) → printed directly
+   - **Generic collections** (`IEnumerable<T>`) → formatted as tables using `StringTable`
+   - **JsonElement** → serialized with camelCase property names
+   - **Other objects** → properties converted to key-value table format
+
+**Basic Usage:**
+```csharp
+// These are equivalent - format defaults to "value"
+Console.Out.CliPrint(42);
+Console.Out.CliPrint(42, "value");
+
+// More complex formatting
+var people = new Person[] { new Person("John", "Doe") };
+Console.Out.CliPrint(people, "table(value, FirstName)");  // Show only FirstName column
+Console.Out.CliPrint(people, "csv(value)");              // Export as CSV
+Console.Out.CliPrint(people, "json(value)");             // Export as JSON
+```
+
+## Basic Formatting Syntax and the BuiltIn `value` Variable
+> **Key Concept:** The built-in variable `value` always refers to your input data.  So the most basic operation would be:
+```csharp
+new StringWriter().CliPrint(1, "value");
+// or new StringWriter().CliPrint(1);  The default formatting is "value" and it can be omitted.
+```
+The expression variable `value` holds the value of the input data `1`.  The api will just print `1` since it is a simple value.
+
+## Simple Value
+The api considers primitive types, string, date and time types as well as Guid as simple value types.  If the input is a collection of simple values, the api will print them line by line.
+```csharp
+var textArray = new string[] {
+   "John", "Emily", "Jane"
+};
+var writer = new StringWriter();
+writer.CliPrint(textArray);
+```
+Output
+```text
+John
+Emily
+Jane
+```
+## Printing Object
+If the `value` is an object but not a collection, by default the api will print its properties using a key value format.  
+```csharp
+public record class Job {
+   public Job(string title) {
+      this.Title = title;
+   }
+   public string Title { get; }
+}
+public record class Person {
+   public Name(string first, string last){
+      this.FirstName = first;
+      this.LastName = last;
+   }
+   public string FirstName { get; }
+   public string LastName  { get; }
+   public Job? Job { get; set; }
+}
+System.Console.Out.CliPrint(new Person("john", "smith"));
+```
+The code above will print
+```
+Key       Value
+---------------
+FirstName john
+LastName  smith
+---------------
+```
+## `json` Operation
+The `json` operation can be used to convert the value to a JsonElement.  The api will always print `JsonElement` by serializing it to text first.  Serialization converts property names to camel case.
+```csharp
+System.Console.Out.CliPrint(new Person("john", "smith"), "json(value)");
+```
+The code above will print out
+```json
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public decimal Price { get; set; }
-    public DateTime Date { get; set; }
+   "firstName": "john",
+   "lastName": "smith"
+}
+```
+## `jsonpointer` Operation
+The `jsonpointer` operation takes a required JSON pointer parameter (like `/firstName` or `/addresses/0/street`) and extracts the corresponding value from the input data.  The parser recognizes JSON pointer syntax directly so it is ok to write the pointer without creating a string.
+> **IMPORTANT:** The api serializes data to json using camel case for property names and JSON pointer is case sensitive.
+```csharp
+var names = new Person[] {
+   new Person("john", "smith"),
+   new Person("jane", "doe"),
+   new Person("ethan", "allen")
+};
+System.Console.Out.CliPrint(names,"'/0/firstName'");  // pointer is created in the form of string. OK
+System.Console.Out.CliPrint(names,"/0/firstName");    // pointer is not a string, but the parser understands it
+System.Console.Out.CliPrint(names,"/0/FirstName");    // pointer /0/FirstName will result a null value since the property name is converted to camel case by the serializer.
+```
+The code above will print out
+```
+"john"
+"john"
+null
+```
+## `property` Operation
+Similar to the `jsonpointer` operation, the `property` operation allows accessing properties of the input value, including nested properties from child objects.
+
+```csharp
+// Basic property access
+// Like C#, the property names are case sensitive
+System.Console.Out.CliPrint(new Person("john", "smith"), "property(value, 'FirstName')");
+// Output: john
+System.Console.Out.CliPrint(person, "property(value, FirstName)");      // also works
+System.Console.Out.CliPrint(person, "property(value, 'firstname')");    // firstname is not a property in class Person.  An exception will be thrown
+```
+With the exception of the builtin variable `value`, the parser treats other variable names the same as strings of the same text.  That's why the second `CliPrint` in the code snippet above works.
+
+### Nested Property Access
+For complex objects with nested properties, use dot notation:
+
+```csharp
+public class Contact {
+    public string FirstName { get; set; }
+    public Address HomeAddress { get; set; }
 }
 
-var products = new List<Product>
-{
-    new Product { Id = 1, Name = "Laptop", Price = 999.99m, Date = DateTime.Now },
-    new Product { Id = 2, Name = "Mouse", Price = 25.50m, Date = DateTime.Now.AddDays(-1) }
+public class Address {
+    public string Street { get; set; }
+    public string City { get; set; }
+}
+
+var contact = new Contact { 
+    FirstName = "John", 
+    HomeAddress = new Address { Street = "123 Main St", City = "Boston" }
+};
+// Access nested properties with dot notation
+System.Console.Out.CliPrint(contact, "property(value, 'HomeAddress.Street')");
+// Output: 123 Main St
+
+System.Console.Out.CliPrint(contact, "property(value, 'HomeAddress.City')");
+// Output: Boston
+```
+
+### Array/Collection Property Access
+Use bracket notation for arrays and collections:
+
+```csharp
+public class Contact {
+    public string FirstName { get; set; }
+    public string[] Emails { get; set; }
+    public Address[] Addresses { get; set; }
+}
+
+public class Address {
+    public string Street { get; set; }
+    public string City { get; set; }
+}
+
+var contact = new Contact {
+    FirstName = "John",
+    Emails = new[] { "john@work.com", "john@home.com" },
+    Addresses = new[] { 
+        new Address { Street = "123 Work St", City = "Boston" },
+        new Address { Street = "456 Home Ave", City = "Cambridge" }
+    }
 };
 
-// Auto format - automatically chooses table format for collections
-Console.Out.CliPrint(products, null); // No format specified, uses automatic detection
+// Access first email
+System.Console.Out.CliPrint(contact, "property(value, 'Emails[0]')");
+// Output: john@work.com
+
+// Access second email  
+System.Console.Out.CliPrint(contact, "property(value, 'Emails[1]')");
+// Output: john@home.com
+
+// Access nested property in array
+System.Console.Out.CliPrint(contact, "property(value, 'Addresses[0].Street')");
+// Output: 123 Work St
+
+System.Console.Out.CliPrint(contact, "property(value, 'Addresses[1].City')");
+// Output: Cambridge
 ```
 
-### Table Format Operations
+### Dictionary Property Access
+For Dictionary properties, use bracket notation with the key.
 
 ```csharp
-// Table format with all columns - auto-detected for collections
-Console.Out.CliPrint(contacts, null);
-// Output:
-// FirstName LastName   AgeInDays Address          Email           Phone           Scores        
-// -------------------------------------------------------------------------------------
-// Elmore    Balistreri 33119     Sample.Address[] System.String[] System.String[] System.Int32[] 
-// Sadye     Lynch      29744     Sample.Address[] System.String[] System.String[] System.Int32[] 
-// -------------------------------------------------------------------------------------
+public class Employee {
+    public string Name { get; set; }
+    public Dictionary<string, string> Metadata { get; set; }
+}
 
-// Table format with specific columns
-Console.Out.CliPrint(contacts, "table(value, FirstName, LastName, AgeInDays)");
-// Output:
-// FirstName LastName AgeInDays
-// ----------------------------
-// Khalil    Moore    22973    
-// Damien    Klocko   10579    
-// ----------------------------
-```
-
-### CSV Format Operations
-
-```csharp
-// CSV format with headers and specific columns
-Console.Out.CliPrint(contacts, "csv(value, FirstName, LastName, AgeInDays)");
-// Output:
-// FirstName,LastName,AgeInDays
-// Keith,Rosenbaum,28018
-// Buck,Sanford,25176
-// Wyatt,Ebert,4080
-
-// Compact CSV without headers (use ccsv, not compactcsv)
-Console.Out.CliPrint(contacts, "ccsv(value, FirstName, LastName, AgeInDays)");
-// Output:
-// Ressie,Turcotte,34433
-// Kenna,Sanford,13520
-// Ryan,Toy,15371
-```
-
-### JSON Format Operations
-
-```csharp
-// JSON array format for collections
-Console.Out.CliPrint(addresses, "json(value)");
-// Output:
-// [
-//   {
-//     "street": "3196 Elva Prairie",
-//     "city": "Cruickshankview", 
-//     "state": "New Hampshire",
-//     "zip": "03337",
-//     "country": "Namibia"
-//   },
-//   {
-//     "street": "15910 Goyette Motorway",
-//     "city": "Stromanberg",
-//     "state": "Massachusetts", 
-//     "zip": "69087-5398",
-//     "country": "Gambia"
-//   }
-// ]
-
-// JSON pointer extraction from collections
-Console.Out.CliPrint(addresses, "jsonpointer(value, /0/street)");
-// Output: "079 Annetta Shoals"
-
-// JSON array format with field extraction (requires JSON pointer)
-Console.Out.CliPrint(addresses, "jsonarray(value, /street)");
-```
-
-### List and Selection Operations
-
-```csharp
-// List with specific column (creates key-value format)
-Console.Out.CliPrint(contacts, "list(value, FirstName)");  
-// Output:
-// Key Value  
-// -----------
-//     Amos   
-// -----------
-//     Bobbie
-// ----------
-
-// Get first N items from collection (returns table format)
-Console.Out.CliPrint(contacts, "first(value, 2)");
-// Output: 
-// FirstName LastName AgeInDays Address          Email           Phone          
-// -----------------------------------------------------------------------------
-// Louie     Tromp    30695     Sample.Address[] System.String[] System.String[]
-// Trace     King     23687     Sample.Address[] System.String[] System.String[]
-// -----------------------------------------------------------------------------
-
-// Get last N items from collection  
-Console.Out.CliPrint(contacts, "last(value, 2)");
-// Output: Similar table format with last 2 items
-```
-
-### Property Access and Element Operations
-
-```csharp
-// Access single property from collection elements
-Console.Out.CliPrint(contacts, "elem_property(value, firstname)");
-
-// Access nested property with complex path
-Console.Out.CliPrint(people, "property(value, '[0].address[0].street')");
-
-// Access object properties  
-Console.Out.CliPrint(contacts, "elem_property(value, 'job')");
-```
-
-### Working with Dictionaries
-
-```csharp
-var dictionary = new Dictionary<int, string>
-{
-    [0] = "Alice Johnson", 
-    [1] = "Bob Smith",
-    [2] = "Carol Davis"
+var employee = new Employee {
+    Name = "Alice",
+    Metadata = new Dictionary<string, string> {
+        ["Department"] = "Engineering",
+        ["Level"] = "Senior",
+        ["Location"] = "Remote"
+    }
 };
 
-// Auto-format dictionary as table (no format string needed)
-Console.Out.CliPrint(dictionary, null);
-// Output:
-// Key Value       
-// ----------------
-// 0   Alice Johnson
-// 1   Bob Smith    
-// 2   Carol Davis  
-// ----------------
-```
+// Access dictionary values by key
+System.Console.Out.CliPrint(employee, "property(value, 'Metadata[Department]')");
+// Output: Engineering
 
-### Working with Single Objects
+System.Console.Out.CliPrint(employee, "property(value, 'Metadata[Level]')");
+// Output: Senior
+```
+### Key Differences from `jsonpointer`
+- **Syntax**: `property` uses dot notation and brackets, `jsonpointer` uses `/` separators
+- **Property names**: both operations use class property names and both are case sensitive.  But `jsonpointer` converts the property name to camel case.
+- **Array access**: `property` uses `[0]`, `jsonpointer` uses `/0`
+- **String Output**: `json` or `jsonpointer` will output string with quotes around it: `"string_value"` while `property` does not.
+- **Error Handling**: `jsonpointer` returns null value for an invalid pointer.  `property` will throw an exception.
 
 ```csharp
-var singleContact = contacts.First();
+var contacts = new Contact[] { 
+    new Contact { FirstName = "John", Emails = new[] { "john@test.com" } }
+};
 
-// Auto format for single object - shows string representation  
-Console.Out.CliPrint(singleContact, null);
-// Output: Contact { FirstName = Emmy, LastName = Harvey, AgeInDays = 32858, 
-//         Address = Sample.Address[], Email = System.String[], Phone = System.String[], 
-//         Scores = System.Int32[], Job = Job { Company = Runolfsdottir and Sons, 
-//         Title = Internal Research Director, Years = 12 }, Dob = 10/18/1935 }
-
-// Use JSON for better single object formatting
-Console.Out.CliPrint(singleContact, "json(value)");
-// Output: Full JSON representation with all properties expanded
+// These are equivalent but use different syntax:
+System.Console.Out.CliPrint(contacts, "property(value, '[0].FirstName')");        // Case-insensitive, bracket notation, output: John
+System.Console.Out.CliPrint(contacts, "jsonpointer(value, /0/firstName)");            // Case-sensitive, slash notation, output: "John"
 ```
 
-### Using with Custom TextWriter
-
+## Print Object Collection
+If the `value` is a generic collection, the api will print its public properties in a tabular format.  The api leverage the `Albatross.Text.Table` library to print out tabular data with aligned formatting.
+> **IMPORTANT:** The API treats a value as a collection **only** if its type implements the generic `IEnumerable<T>` interface, including arrays and generic collections. Non-generic collections (such as `IEnumerable` without a type parameter) are not recognized as collections for tabular printing.
 ```csharp
-using var writer = new StringWriter();
-
-// Write to custom TextWriter instead of Console
-writer.CliPrint(products, "table(value, Name, Price)");
-
-string result = writer.ToString();
+var names = new Person[] {
+   new Person("john", "smith"),
+   new Person("jane", "doe"),
+   new Person("ethan", "allen")
+};
+System.Console.Out.CliPrint(names);
 ```
-
-### Advanced - Custom Parser and Context
-
+The code above will print
+```
+FirstName LastName
+------------------
+john      smith
+jane      doe
+ethan     allen
+------------------
+```
+### Customize the Tabular Format of Object Collection Printing
+By default the api will print all public properties of a type as the columns of a table.  To customized it, register a [TableOption](../Albatross.Text.Table/TableOptions.cs) instance using [TableOptionFactory](../Albatross.Text.Table/TableOptionFactory.cs).  The registration of `TableOption` via the static instance `TableOptionFactory.Instance` is global and only needs to be done once.
 ```csharp
-// Build a custom parser (normally handled internally)
-var parser = Extensions.BuildCustomParser();
-var expression = parser.Build("table(value, Name, Price)");
-
-// Manual execution with custom context
-var context = new CustomExecutionContext<List<Product>>(parser);
-var result = expression.Eval(name => context.GetValue(name, products));
-
-// Output the result
-Console.Out.CliPrint(result, null);
+TableOptionFactory.Instance.Register(new TableOption<Person>().Ignore(x => x.LastName));
 ```
-
-## Format Expression Syntax
-
-The library uses prefix notation for format expressions with the `value` variable representing the input data:
-
-| Operation | Syntax | Description | Example |
-|-----------|--------|-------------|---------|
-| **Auto** | `null` or empty | Auto-detect format based on data type | `Console.Out.CliPrint(data, null)` |
-| **Table** | `table(value, [columns...])` | Tabular output with optional column selection | `table(value, Name, Price)` |
-| **CSV** | `csv(value, [columns...])` | CSV with headers and optional column selection | `csv(value, Name, Price)` |
-| **Compact CSV** | `ccsv(value, [columns...])` | CSV without headers | `ccsv(value, Id, Name)` |
-| **List** | `list(value, [column])` | Simple list format with optional single column | `list(value, Name)` |
-| **JSON** | `json(value)` | JSON object serialization | `json(value)` |
-| **JSON Pointer** | `jsonpointer(value, pointer)` | Extract field using JSON pointer | `jsonpointer(value, /street)` |
-| **JSON Array** | `jsonarray(value, pointer)` | JSON array with field extraction | `jsonarray(value, /Name)` |
-| **First** | `first(value, [count])` | First N items from collection | `first(value, 3)` |
-| **Last** | `last(value, [count])` | Last N items from collection | `last(value, 2)` |
-| **Property** | `property(value, path)` | Access nested properties with complex paths | `property(value, '[0].address[0].street')` |
-| **Element Property** | `elem_property(value, property)` | Access property from collection elements | `elem_property(value, firstname)` |
-
-### Key Concepts
-
-- **`value`** - Built-in variable referring to the input data
-- **Column Names** - Property names can be referenced directly (e.g., `Name`, `Price`, `firstname`)
-- **JSON Pointers** - Use JSON pointer notation for field extraction (e.g., `/street`, `/Name`)
-- **Property Paths** - Complex nested property access using bracket notation
-- **Auto-Detection** - When format is `null`, automatically selects table format for collections and property display for single objects
-
-## API Reference
-
-### Core Extension Method
-
-```csharp
-// Main extension method for formatting output
-TextWriter.CliPrint<T>(T value, string? format)
+If the line above is called first, the prior example will print the text below instead.
 ```
-
-### Available Operations
-
-All operations are implemented as prefix expressions that can be used in format strings:
-
-```csharp
-// Table operations
-"table(value)"                          // All columns
-"table(value, Name, Price)"            // Specific columns
-
-// CSV operations  
-"csv(value)"                           // All columns with headers
-"csv(value, Name, Price)"              // Specific columns with headers
-"compactcsv(value, Id, Name)"          // No headers
-
-// JSON operations
-"json(value)"                          // Full JSON serialization
-"jsonpointer(value, /street)"          // Extract using JSON pointer
-"jsonarray(value, /Name)"              // Array with field extraction
-
-// List and selection operations
-"list(value)"                          // Simple list format
-"list(value, Name)"                    // Single column list
-"first(value, Name, 3)"                // First N items
-"last(value, Name, 2)"                 // Last N items
-
-// Property access operations
-"elem_property(value, firstname)"       // Property from collection elements
-"property(value, '[0].address[0].street')" // Complex nested property access
+FirstName
+---------
+john     
+jane     
+ethan    
+---------
 ```
+## Other Operations
+1. `first` and `last`
+   Both operations only take 1 parameter.  If its parameter is a collection, the operation will return the first or last element respectively.  If the parameter is not a collection, both operations will return the parameter itself.
 
-## Project Structure
+   parameters:
+   1. input value
+1. `subset`
+   The `subset` operation will take 2 or 3 parameters.  Its behavior is similar to the `string.substring` method.  But the subset operation will not return index out of bound exception.  It will just return an empty collection.
+   > **NOTE:** The `subset` operation will always return a collection.  If the input value is not a collection, the `subset` operation will convert it to a collection with a single element first.
 
-```
-Albatross.Text.CliFormat/
-├── Extensions.cs                      # Main extension methods and parser builder
-├── Operations/                        # Format operation implementations
-│   ├── Table.cs                      # Tabular output formatting
-│   ├── Csv.cs                        # CSV with headers
-│   ├── CompactCsv.cs                 # CSV without headers
-│   ├── Json.cs                       # JSON object serialization  
-│   ├── JsonArray.cs                  # JSON array with field extraction
-│   ├── JsonPointer.cs                # JSON pointer extraction
-│   ├── List.cs                       # Simple list formatting
-│   ├── First.cs                      # First N items extraction
-│   ├── Last.cs                       # Last N items extraction
-│   ├── Property.cs                   # Property access operations
-│   ├── ElementProperty.cs            # Element property access
-│   ├── CustomExecutionContext.cs     # Expression evaluation context
-│   └── Extensions.cs                 # Collection conversion utilities
-├── CsvClassMap.cs                     # CSV column mapping helper
-├── CustomVariableFactory.cs          # Variable resolution factory
-├── JsonPointerLiteral.cs             # JSON pointer literal support
-├── JsonPointerLiteralFactory.cs      # JSON pointer literal factory
-├── FormattedJsonSerialization.cs     # Pretty JSON serialization
-├── CompactJsonSerialization.cs       # Compact JSON serialization
-├── Albatross.Text.CliFormat.csproj   # Project file
-└── README.md                          # This file
-```
+   parameters:
+   1. input value
+   1. starting index (0 based)
+   1. count (optional.  If omitted, return all elements after the starting index)
+1. `csv` and `ccsv`
+   Both operations will convert the input value into csv strings.  `ccsv` stands for compact csv.  It doesn't show headers.  Both operations will accept any numbers of columns.  If specified, the operations will only print those columns.  The columns names should match the property name and they are case sensitive.  An exception will be thrown if the property is not found.
 
-## Running Tests
+   parameters:
+   1. input value
+   1. Property1 name
+   1. Property2 name
+   1. ...
+1. `collection_property`
+   The `collection_property` operation extracts a specific property from each element of a collection and returns an array of those property values. If the input value is not a collection.  It will be converted to a collection of a single element.
 
-The project includes test coverage in both the `Albatross.Text.Test` and `Sample` projects:
+   parameters:
+   1. input value
+   2. property name (case sensitive)
 
-```bash
-# Run all tests in the solution
-dotnet test
+   ```csharp
+   var people = new Person[] {
+      new Person("john", "smith"),
+      new Person("jane", "doe"), 
+      new Person("ethan", "allen")
+   };
 
-# Run tests with detailed output
-dotnet test --verbosity normal
-
-# Run only CliFormat related tests
-dotnet test --filter "TestCliFormat"
-
-# Run tests for specific target framework
-dotnet test --framework net8.0
-```
-
-### Sample Project Usage Examples
-
-The `Sample` project can be run to see live demonstrations of the CLI formatting:
-
-```bash
-# Run the sample project to see available commands
-dotnet run --project Sample -- --help
-
-# Table format with auto-detection (collections become tables)
-dotnet run --project Sample -- collection contact --count 3
-# Output: Full contact table with all properties
-
-# Table with specific columns
-dotnet run --project Sample -- collection contact --count 3 --format "table(value, FirstName, LastName, AgeInDays)"
-# Output: Filtered table with selected columns
-
-# CSV formats
-dotnet run --project Sample -- collection contact --count 3 --format "csv(value, FirstName, LastName)"
-dotnet run --project Sample -- collection contact --count 3 --format "ccsv(value, FirstName, LastName)"
-
-# JSON format
-dotnet run --project Sample -- collection address --count 2 --format "json(value)"
-
-# Dictionary formatting  
-dotnet run --project Sample -- dictionary --count 3
-# Output: Key-value table format
-
-# First/Last operations
-dotnet run --project Sample -- collection contact --count 5 --format "first(value, 2)"
-dotnet run --project Sample -- collection contact --count 5 --format "last(value, 2)"
-
-# Use case demonstrations
-dotnet run --project Sample -- use-case json-pointer
-dotnet run --project Sample -- use-case table-array-property
-dotnet run --project Sample -- use-case string-array-property
-
-# Single object formatting
-dotnet run --project Sample -- single contact
-```
-
-Code examples from the sample project:
-
-```csharp
-// From Sample/TestPrintCollection.cs - Collection formatting
-Console.Out.CliPrint(contacts, options.Format);
-
-// From Sample/UserCases/TestTableArrayProperty.cs - Table with specific columns  
-writer.CliPrint(items, "table(value, firstname, lastname)");
-
-// From Sample/UserCases/TestJsonPointerUserCase.cs - JSON pointer extraction
-writer.CliPrint(addresses, "jsonpointer(value, /0/street)");
-
-// From Sample/UserCases/TestElementPropertyWithStringValue.cs - Element property access
-writer.CliPrint(contacts, "elem_property(value, firstname)");
-
-// From Sample/UserCases/TestDictionary.cs - Dictionary auto-formatting
-writer.CliPrint(dictionary, null);
-```
-
-### Test Coverage Areas
-
-Tests cover:
-- Expression parsing and evaluation
-- All format operations (table, csv, json, list, etc.)
-- Property access and JSON pointer extraction
-- Dictionary and collection handling
-- Edge cases and error scenarios
-- Integration with Albatross.Text.Table for tabular output
-
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. **Fork** the repository on GitHub
-2. **Create** a feature branch from `main`:
-   ```bash
-   git checkout -b feature/your-feature-name
+   // Extract FirstName from each person
+   System.Console.Out.CliPrint(people, "collection_property(value, FirstName)");
    ```
-3. **Make** your changes with appropriate tests
-4. **Ensure** all tests pass:
-   ```bash
-   dotnet test
+   
+   The code above will print:
    ```
-5. **Follow** existing code conventions and add XML documentation
-6. **Commit** your changes with clear messages:
-   ```bash
-   git commit -m "Add: Brief description of your changes"
+   john
+   jane
+   ethan
    ```
-7. **Push** to your fork and **submit** a pull request
+1. `collection_jsonpointer`
+   The `collection_jsonpointer` operation applies a JSON pointer to each element in a collection and returns an array of the extracted values. This operation first converts the input to a JSON array, then applies the specified JSON pointer to each element.
 
-### Code Guidelines
-- Follow existing naming conventions and code style
-- Add unit tests for new formatting operations
-- Include XML documentation for public APIs
-- Ensure code builds without warnings
-- Update README.md if adding new features
+   Unlike `jsonpointer` which works on the entire input data, `collection_jsonpointer` processes each item in a collection individually and extracts the same JSON path from all of them.
 
-### Reporting Issues
-- Use GitHub Issues to report bugs or request features
-- Provide minimal reproduction code when possible
-- Include expected vs. actual behavior
-- Specify .NET version and relevant dependencies
+   parameters:
+   1. input collection
+   2. JSON pointer path (like `/firstName` or `/addresses/0/street`)
 
-## License
+   ```csharp
+   var people = new Person[] {
+      new Person("john", "smith"),
+      new Person("jane", "doe"), 
+      new Person("ethan", "allen")
+   };
 
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+   // Extract firstName from each person using JSON pointer
+   System.Console.Out.CliPrint(people, "collection_jsonpointer(value, /firstName)");
+   ```
+   
+   The code above will print:
+   ```
+   "john"
+   "jane"
+   "ethan"
+   ```
+   > **IMPORTANT:** Like `jsonpointer`, this operation uses camelCase property names and is case-sensitive. 
+1. `table`
+   The `table` operation converts collection data into a formatted table with aligned columns and borders. This is the **default operation** automatically applied when you call `CliPrint` on a collection.
 
-Copyright (c) 2019 Rushui Guan
+   By explicitly using the `table` operation, you can control which columns to display and their order.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+   > **IMPORTANT:** The `table` operation returns a `StringTable` object, not a collection. This means it **cannot be chained** as input for other operations and should always be used as the final operation in a chain.
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+   parameters:
+   1. input collection
+   2. property name 1 (case sensitive, optional)
+   3. property name 2 (case sensitive, optional)
+   4. ... (additional property names as needed)
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+   ```csharp
+   var people = new Person[] {
+      new Person("john", "smith"),
+      new Person("jane", "doe"), 
+      new Person("ethan", "allen")
+   };
+
+   // Table with single column
+   System.Console.Out.CliPrint(people, "table(value, FirstName)");
+   ```
+   
+   The code above will print:
+   ```
+   FirstName
+   ---------
+   john     
+   jane     
+   ethan    
+   ---------
+   ```
+1. `list`
+   The `list` operation converts collection data into a key-value format where each object's properties are displayed as separate Key-Value pairs. This creates a detailed, property-by-property view of your data with clear separators between objects.
+
+   > **IMPORTANT:** The `list` operation returns a collection of `Dictionary<string, object>` instances that `CliPrint` automatically formats as a two-column table with "Key" and "Value" headers.
+
+   parameters:
+   1. input collection
+   2. property name (case sensitive, optional)
+
+   **Full Object Display:**
+   ```csharp
+   var people = new Person[] {
+      new Person("john", "smith") {
+         Job = new Job("engineer")
+      },
+      new Person("jane", "doe") {
+         Job = new Job("analyst")  
+      },
+      new Person("ethan", "allen")
+   };
+
+   // Show all properties for each person, note that ethan allen doesn't have a job
+   System.Console.Out.CliPrint(people, "list(value)");
+   ```
+   
+   The code above will print:
+   ```
+   Key       Value
+   ------------------
+   FirstName john
+   LastName  smith
+   Job.Title engineer
+   ------------------
+   FirstName jane
+   LastName  doe
+   Job.Title analyst
+   ------------------
+   FirstName ethan
+   LastName  allen
+   ------------------
+   ```
+
+   **Selected Single Property Display of Simple Values:**
+   ```csharp
+   // Show only FirstName property - returns simple values, not key-value pairs
+   System.Console.Out.CliPrint(people, "list(value, FirstName)");
+   ```
+   
+   Output:
+   ```
+   john
+   jane
+   ethan
+   ```
+
+   **Selected Single Property Display of Objects:**
+   ```csharp
+   // Show only Job property - returns key-value pairs for each object's properties
+   System.Console.Out.CliPrint(people, "list(value, Job)");
+   ```
+   
+   Output:
+   ```
+   Key   Value
+   --------------
+   Title engineer
+   --------------
+   Title analyst
+   --------------
+   --------------
+   ```

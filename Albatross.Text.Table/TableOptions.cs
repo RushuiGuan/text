@@ -68,6 +68,8 @@ namespace Albatross.Text.Table {
 			} else {
 				// note that an object can never contain an instance of Nullable struct
 				switch (value) {
+					case string text:
+						return text;
 					case DateOnly date:
 						return $"{date:yyyy-MM-dd}";
 					case TimeOnly time:

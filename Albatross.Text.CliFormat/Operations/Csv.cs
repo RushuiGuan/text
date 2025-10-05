@@ -2,6 +2,7 @@
 using Albatross.Expression.Prefix;
 using CsvHelper.Configuration;
 using System.Globalization;
+using System.Reflection;
 
 namespace Albatross.Text.CliFormat.Operations {
 	/// <summary>
@@ -23,7 +24,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		protected override object Run(List<object> operands) {
 			return Print(operands, true);
 		}
-		
+
 		/// <summary>
 		/// Generates CSV output from a collection with configurable header inclusion and column selection.
 		/// </summary>
@@ -46,7 +47,14 @@ namespace Albatross.Text.CliFormat.Operations {
 				writer.WriteRecords(items);
 			} else {
 				var classMapType = typeof(CsvClassMap<>).MakeGenericType(type);
-				var classMap = (ClassMap)Activator.CreateInstance(classMapType, [parameters])!;
+				ClassMap classMap;
+				try {
+					classMap = (ClassMap)Activator.CreateInstance(classMapType, [parameters])!;
+				} catch (TargetInvocationException ex) when (ex.InnerException is ArgumentException) {
+					throw new InvalidOperationException(ex.InnerException.Message);
+				} catch {
+					throw new InvalidOperationException($"Unable to create a csv class map for {type.Name}");
+				}
 				using var writer = new CsvHelper.CsvWriter(textWriter, configuration, true);
 				writer.Context.RegisterClassMap(classMap!);
 				writer.WriteRecords(items);

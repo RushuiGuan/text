@@ -20,27 +20,6 @@ namespace Albatross.Text.Table {
 			return table;
 		}
 
-		[Obsolete]
-		public static StringTable PropertyTable(this object instance, string? path = null, StringTable? table = null) {
-			object? target;
-			if (!string.IsNullOrEmpty(path)) {
-				target = instance.GetType().GetPropertyValue(instance, path, true);
-			} else {
-				target = instance;
-			}
-			var dictionary = new Dictionary<string, object>();
-			target.ToDictionary(dictionary);
-			const string propertyColumn = "Property";
-			const string valueColumn = "Value";
-			if (table == null) {
-				table = new StringTable(propertyColumn, valueColumn);
-			}
-			foreach (var item in dictionary) {
-				table.AddRow(new TextValue(item.Key), new TextValue(TableOptions.DefaultFormat(item.Value)));
-			}
-			return table;
-		}
-
 		public static StringTable ChangeColumn(this StringTable table, Func<StringTable.Column, bool> predicate, Action<StringTable.Column> action) {
 			foreach (var column in table.Columns.Where(predicate)) {
 				action(column);

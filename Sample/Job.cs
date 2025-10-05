@@ -9,8 +9,8 @@ namespace Sample {
 		public static Job Random(Faker faker) {
 			return new Job {
 				Company = faker.Company.CompanyName(),
-				Title   = faker.Name.JobTitle(),
-				Years   = faker.Random.Int(1, 20)
+				Title = faker.Name.JobTitle(),
+				Years = faker.Random.Int(1, 20)
 			};
 		}
 	}

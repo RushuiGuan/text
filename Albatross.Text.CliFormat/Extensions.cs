@@ -25,7 +25,7 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new CustomVariableFactory());
 			builder.AddFactory(new JsonPointerLiteralFactory());
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Json>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonArray>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.ElementJson>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonPointer>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Csv>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.CompactCsv>(false));
@@ -34,7 +34,7 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new PrefixExpressionFactory<Operations.First>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Last>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Property>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.ElementProperty>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.CollectionProperty>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Subset>(false));
 			return new Parser(builder.Factories, false);
 		}
@@ -56,8 +56,8 @@ namespace Albatross.Text.CliFormat {
 				result = expr.Eval(name => context.GetValue(name, value));
 			}
 			var type = result.GetType();
-			if (result is string text) {
-				writer.WriteLine(text);
+			if (type.IsSimpleValue()) {
+				writer.WriteLine(TableOptions.DefaultFormat(result));
 			} else if (result is StringTable stringTable) {
 				stringTable.Print(writer);
 			} else if (type.TryGetGenericCollectionElementType(out var elementType)) {
