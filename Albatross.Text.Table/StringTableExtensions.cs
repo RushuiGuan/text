@@ -51,19 +51,50 @@ namespace Albatross.Text.Table {
 			}
 		}
 
-		public static void Align(this StringTable srcTable, StringTable other, bool useSourceWidth) {
-			if (srcTable.Columns.Length != other.Columns.Length) {
-				throw new ArgumentException("Cannot align tables with different number of columns");
-			}
-			for (int i = 0; i < srcTable.Columns.Length; i++) {
-				var srcColumn = srcTable.Columns[i];
-				var otherColumn = other.Columns[i];
-				if (useSourceWidth || otherColumn.DisplayWidth < srcColumn.DisplayWidth) {
-					otherColumn.DisplayWidth = srcColumn.DisplayWidth;
-				} else {
-					srcColumn.DisplayWidth = otherColumn.DisplayWidth;
+		public static void AlignFirst(this IEnumerable<StringTable> tables) {
+			int? columnCount = null;
+			StringTable? first = null;
+			foreach (var table in tables) {
+				if (columnCount == null) {
+					columnCount = table.Columns.Length;
+				} else if (columnCount != table.Columns.Length) {
+					throw new ArgumentException("Cannot align tables with different number of columns");
 				}
-				otherColumn.AlignRight = srcColumn.AlignRight;
+				if (first == null) {
+					first = table;
+				}
+				for (int i = 1; i < table.Columns.Length; i++) {
+					var firstColumn = first.Columns[i];
+					var column = table.Columns[i];
+					column.SetMaxTextWidth(firstColumn.DisplayWidth);
+					column.AlignRight = firstColumn.AlignRight;
+				}
+			}
+		}
+		public static void AlignAll(this IEnumerable<StringTable> tables) {
+			int? columnCount = null;
+			Dictionary<int, int> maxWidths = new Dictionary<int, int>();
+			Dictionary<int, bool> alignRights = new Dictionary<int, bool>();
+			foreach (var table in tables) {
+				if (columnCount == null) {
+					columnCount = table.Columns.Length;
+				} else if (columnCount != table.Columns.Length) {
+					throw new ArgumentException("Cannot align tables with different number of columns");
+				}
+				for (int i = 0; i < table.Columns.Length; i++) {
+					if (!maxWidths.TryGetValue(i, out var maxWidth) || table.Columns[i].DisplayWidth > maxWidth) {
+						maxWidths[i] = table.Columns[i].DisplayWidth;
+					}
+					if (!alignRights.TryGetValue(i, out var alignRight) || !alignRight && table.Columns[i].AlignRight) {
+						alignRights[i] = table.Columns[i].AlignRight;
+					}
+				}
+			}
+			foreach (var table in tables) {
+				for (int i = 0; i < table.Columns.Length; i++) {
+					var column = table.Columns[i];
+					column.SetMaxTextWidth(maxWidths[i]);
+				}
 			}
 		}
 	}

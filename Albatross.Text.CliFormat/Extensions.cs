@@ -78,17 +78,16 @@ namespace Albatross.Text.CliFormat {
 		}
 
 		static void PrintDictionaryList(IEnumerable<IDictionary> list, TextWriter writer) {
-			StringTable? first = null;
 			var tables = new List<StringTable>();
+			StringTable? first = null;
 			foreach (var item in list) {
 				var table = item.StringTable();
-				tables.Add(table);
 				if (first == null) {
 					first = table;
-				} else {
-					first.Align(table, false);
 				}
+				tables.Add(table);
 			}
+			tables.AlignAll();
 			foreach (var table in tables) {
 				if (table == first) {
 					table.Print(writer, true, true, true);
