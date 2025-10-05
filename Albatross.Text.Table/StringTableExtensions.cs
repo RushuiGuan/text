@@ -85,7 +85,7 @@ namespace Albatross.Text.Table {
 					if (!maxWidths.TryGetValue(i, out var maxWidth) || table.Columns[i].DisplayWidth > maxWidth) {
 						maxWidths[i] = table.Columns[i].DisplayWidth;
 					}
-					if (!alignRights.TryGetValue(i, out var alignRight) || !alignRight && table.Columns[i].AlignRight) {
+					if (!alignRights.TryGetValue(i, out var alignRight) || table.Columns[i].AlignRight) {
 						alignRights[i] = table.Columns[i].AlignRight;
 					}
 				}
