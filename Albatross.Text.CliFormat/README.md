@@ -2,9 +2,9 @@
 A .NET library that provides flexible text formatting for CLI applications using runtime format expressions. Transform collections and objects into various output formats like tables, CSV, JSON, and custom layouts through a expression-based system.
 
 ## Features
-- **Runtime Expression Formatting** - Transform data using expression strings like `"table(value, FirstName)"` or `"csv(first(value, 5))"`
+- **Runtime Expression Formatting** - Transform data using expression strings like `"table(value, FirstName)"` or `"csv(subset(value, 0, 5))"`
 - **Auto-Detection** - Automatically formats collections as tables, objects as key-value pairs, and simple values as text
-- **Chainable Operations** - Combine operations like `"table(first(value, 2), Name, Age)"` for powerful data transformations
+- **Chainable Operations** - Combine operations like `"table(subset(value, 0, 2), Name, Age)"` for powerful data transformations
 - **Multiple Output Formats** - Built-in support for tables, CSV, JSON, key-value lists, and custom formats
 - **Deep Property Access** - Navigate nested objects with dot notation (`Address.Street`) and array indexing (`Emails[0]`)
 - **JSON Pointer Support** - Extract data using JSON pointer syntax (`/firstName`, `/addresses/0/street`)
@@ -13,6 +13,36 @@ A .NET library that provides flexible text formatting for CLI applications using
 
 ## Prerequisites
 - .NET SDK 8.0 or later
+
+## Installation
+
+```bash
+dotnet add package Albatross.Text.CliFormat
+```
+
+## Quick Start
+
+```csharp
+using Albatross.Text.CliFormat;
+
+var people = new[] {
+    new { Name = "John", Age = 30, City = "Boston" },
+    new { Name = "Jane", Age = 25, City = "Seattle" }
+};
+
+// Simple table output
+Console.Out.CliPrint(people);
+// Name Age City   
+// -------------- 
+// John 30  Boston 
+// Jane 25  Seattle
+// --------------
+
+// Custom formatting with expressions  
+Console.Out.CliPrint(people, "csv(value, Name, Age)");        // CSV export
+Console.Out.CliPrint(people, "json(subset(value, 0, 1))");   // JSON of first item
+Console.Out.CliPrint(people, "table(value, Name)");          // Table with Name column only
+```
 - Target framework: .NET 8.0
 - Dependencies:
   - Albatross.Expression 4.0.0+
@@ -54,13 +84,14 @@ Console.Out.CliPrint(people, "csv(value)");              // Export as CSV
 Console.Out.CliPrint(people, "json(value)");             // Export as JSON
 ```
 
-## Basic Formatting Syntax and the BuiltIn `value` Variable
-> **Key Concept:** The built-in variable `value` always refers to your input data.  So the most basic operation would be:
+## Basic Formatting Syntax and the Built-In `value` Variable
+> **Key Concept:** The built-in variable `value` always refers to your input data. All format expressions operate on this `value` variable.
+
 ```csharp
 new StringWriter().CliPrint(1, "value");
 // or new StringWriter().CliPrint(1);  The default formatting is "value" and it can be omitted.
 ```
-The expression variable `value` holds the value of the input data `1`.  The api will just print `1` since it is a simple value.
+The expression variable `value` holds the value of the input data `1`. The API will just print `1` since it is a simple value.
 
 ## Simple Value
 The api considers primitive types, string, date and time types as well as Guid as simple value types.  If the input is a collection of simple values, the api will print them line by line.
@@ -291,6 +322,39 @@ jane
 ethan    
 ---------
 ```
+## Chaining Operations for Complex Data Transformations
+
+Operations can be chained together to create powerful data transformations. The inner operations execute first, with their results becoming input to outer operations:
+
+```csharp
+// Get first email from a contact
+writer.CliPrint(contact, "property(value, 'Emails[0]')");
+
+// Get table of first 2 contacts with specific columns  
+writer.CliPrint(contacts, "table(subset(value, 0, 2), FirstName, LastName)");
+
+// Extract nested property and format as JSON
+writer.CliPrint(contact, "json(property(value, 'HomeAddress.Street'))");
+
+// Complex chaining: Get names from first 3 items as CSV
+writer.CliPrint(contacts, "csv(subset(value, 0, 3), FirstName, LastName)");
+
+// JSON pointer extraction from array
+writer.CliPrint(addresses, "jsonpointer(value, /0/street)");
+```
+
+### Pro Tip: Start Simple, Then Chain
+```csharp
+// Step 1: Basic table
+"table(value, FirstName, LastName)"
+
+// Step 2: Add filtering  
+"table(subset(value, 0, 5), FirstName, LastName)"
+
+// Step 3: Add property extraction for complex data
+"table(subset(collection_property(value, Contact), 0, 5), FirstName, LastName)"
+```
+
 ## Other Operations
 1. `first` and `last`
    Both operations only take 1 parameter.  If its parameter is a collection, the operation will return the first or last element respectively.  If the parameter is not a collection, both operations will return the parameter itself.
@@ -468,3 +532,53 @@ ethan
    --------------
    --------------
    ```
+
+## Quick Reference
+
+### Core Operations Summary
+
+| Operation | Syntax | Input | Output | Purpose |
+|-----------|--------|-------|--------|---------|
+| `table` | `table(collection, [cols...])` | Collection | StringTable | Tabular display with optional column filtering |
+| `csv` | `csv(collection, [cols...])` | Collection | CSV string | CSV export with headers |
+| `ccsv` | `ccsv(collection, [cols...])` | Collection | CSV string | Compact CSV without headers |
+| `json` | `json(data)` | Any | JSON string | JSON serialization with camelCase properties |
+| `list` | `list(collection, [col])` | Collection | Key-value pairs | Property listing format |
+| `subset` | `subset(collection, start, [count])` | Collection | Collection | Extract range of items |
+| `first` | `first(collection)` | Collection | Single item | Get first element |
+| `last` | `last(collection)` | Collection | Single item | Get last element |
+| `property` | `property(object, 'path')` | Object | Property value | Access nested properties with dot/bracket notation |
+| `collection_property` | `collection_property(collection, prop)` | Collection | Array | Extract property from each element |
+| `jsonpointer` | `jsonpointer(data, /path)` | Any | Extracted value | JSON pointer extraction (case-sensitive) |
+| `collection_jsonpointer` | `collection_jsonpointer(collection, /pointer)` | Collection | JSON array | JSON array with field filtering |
+
+### Common Patterns
+
+```csharp
+// Basic formatting
+writer.CliPrint(data);                           // Auto-detect format
+writer.CliPrint(data, "table(value, Name, Age)"); // Table with specific columns
+writer.CliPrint(data, "json(value)");             // JSON output
+
+// Data extraction
+writer.CliPrint(contact, "property(value, 'Email')");        // Single property
+writer.CliPrint(contacts, "collection_property(value, Name)"); // Property from each item
+writer.CliPrint(data, "jsonpointer(value, /users/0/name)");   // JSON pointer
+
+// Collection operations  
+writer.CliPrint(items, "subset(value, 0, 5)");              // First 5 items
+writer.CliPrint(items, "first(value)");                     // First item only
+writer.CliPrint(items, "csv(subset(value, 0, 10), Name)");  // CSV of first 10 names
+
+// Complex chaining
+writer.CliPrint(data, "table(subset(value, 0, 3), FirstName, LastName)");
+writer.CliPrint(contacts, "json(property(value, 'Address[0]'))");
+```
+
+### Error Handling Tips
+
+- **Property names are case-sensitive** for `property()` operation
+- **JSON pointers are case-sensitive** and use camelCase property names  
+- **Collection operations** only work with `IEnumerable<T>` types
+- **Index out of bounds** in `subset()` returns empty collection (no exception)
+- **Missing properties** in table operations throw exceptions - use `property()` for safe access
