@@ -40,7 +40,7 @@ namespace Albatross.Text.Table {
 			var type = typeof(T);
 			if(type.IsSimpleValue()){
 				options = new TableOptions<T>()
-					.SetColumn("Value", x => x)
+					.SetColumn<T>("Value", x => x)
 					.PrintFirstLineSeparator(false)
 					.PrintLastLineSeparator(false)
 					.PrintHeader(false);

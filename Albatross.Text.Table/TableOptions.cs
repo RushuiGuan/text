@@ -41,7 +41,7 @@ namespace Albatross.Text.Table {
 			return this;
 		}
 
-		public TableOptions SetColumn(string property, Func<object, object?> getValue) {
+		public void SetColumn(string property, Func<object, object?> getValue) {
 			var column = GetColumn(property);
 			if (column == null) {
 				column = new TableColumnOption(property, getValue, (_, value) => new TextValue(DefaultFormat(value))) {
@@ -52,7 +52,6 @@ namespace Albatross.Text.Table {
 			} else {
 				column.GetValueDelegate = getValue;
 			}
-			return this;
 		}
 
 		public IEnumerable<TableColumnOption> Build() {
