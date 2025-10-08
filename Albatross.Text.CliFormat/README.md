@@ -284,7 +284,7 @@ var contacts = new Contact[] {
 };
 
 // These are equivalent but use different syntax:
-System.Console.Out.CliPrint(contacts, "property(value, '[0].FirstName')");        // Case-insensitive, bracket notation, output: John
+System.Console.Out.CliPrint(contacts, "property(value, '[0].FirstName')");        // Case-sensitive, bracket notation, output: John
 System.Console.Out.CliPrint(contacts, "jsonpointer(value, /0/firstName)");            // Case-sensitive, slash notation, output: "John"
 ```
 
@@ -309,9 +309,9 @@ ethan     allen
 ------------------
 ```
 ### Customize the Tabular Format of Object Collection Printing
-By default the api will print all public properties of a type as the columns of a table.  To customized it, register a [TableOption](../Albatross.Text.Table/TableOptions.cs) instance using [TableOptionFactory](../Albatross.Text.Table/TableOptionFactory.cs).  The registration of `TableOption` via the static instance `TableOptionFactory.Instance` is global and only needs to be done once.
+By default the api will print all public properties of a type as the columns of a table.  To customized it, register a [TableOptions](../Albatross.Text.Table/TableOptions.cs) instance using [TableOptionFactory](../Albatross.Text.Table/TableOptionFactory.cs).  The registration of `TableOptions` via the static instance `TableOptionFactory.Instance` is global and only needs to be done once.
 ```csharp
-TableOptionFactory.Instance.Register(new TableOption<Person>().Ignore(x => x.LastName));
+TableOptionFactory.Instance.Register(new TableOptions<Person>().Ignore(x => x.LastName));
 ```
 If the line above is called first, the prior example will print the text below instead.
 ```
