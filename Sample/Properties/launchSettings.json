@@ -10,7 +10,7 @@
     },
     "json array": {
       "commandName": "Project",
-      "commandLineArgs": "test table -f collection_jsonpointer(value)"
+      "commandLineArgs": "test table -f cjsonpointer(value)"
     },
     "property": {
       "commandName": "Project",

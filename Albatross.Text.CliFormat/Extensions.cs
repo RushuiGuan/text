@@ -36,6 +36,7 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Property>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.CollectionProperty>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Subset>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.Format>(false));
 			return new Parser(builder.Factories, false);
 		}
 

@@ -14,7 +14,7 @@ namespace Sample.UserCases {
 				Random = new Bogus.Randomizer(12345)
 			};
 			var item = Enumerable.Range(1, 5).Select(x => Contact.Create(faker)).ToArray();
-			var format = "collection_property(value, 'job')";
+			var format = "cproperty(value, 'job')";
 			this.writer.WriteLine("Format: " + format);
 			this.writer.CliPrint(item, format);
 			return 0;

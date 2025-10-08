@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Albatross.Text.CliFormat.Operations {
 	public class ElementJson : PrefixExpression {
-		public ElementJson() : base("collection_jsonpointer", 2, 2) {
+		public ElementJson() : base("cjsonpointer", 2, 2) {
 		}
 
 		protected override object Run(List<object> operands) {

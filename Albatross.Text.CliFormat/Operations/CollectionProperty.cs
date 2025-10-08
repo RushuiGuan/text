@@ -5,7 +5,7 @@ using Array = System.Array;
 
 namespace Albatross.Text.CliFormat.Operations {
 	public class CollectionProperty : PrefixExpression {
-		public CollectionProperty() : base("collection_property", 2, 2) {
+		public CollectionProperty() : base("cproperty", 2, 2) {
 		}
 
 		protected override object Run(List<object> operands) {

@@ -8,7 +8,7 @@ A .NET library that provides flexible text formatting for CLI applications using
 - **Multiple Output Formats** - Built-in support for tables, CSV, JSON, key-value lists, and custom formats
 - **Deep Property Access** - Navigate nested objects with dot notation (`Address.Street`) and array indexing (`Emails[0]`)
 - **JSON Pointer Support** - Extract data using JSON pointer syntax (`/firstName`, `/addresses/0/street`)
-- **Collection Processing** - Extract properties from all collection elements with `collection_property` and `collection_jsonpointer`
+- **Collection Processing** - Extract properties from all collection elements with `cproperty` and `cjsonpointer`
 - **Flexible Table Customization** - Control column visibility, headers, and formatting via `TableOptionFactory`
 
 ## Prerequisites
@@ -352,7 +352,7 @@ writer.CliPrint(addresses, "jsonpointer(value, /0/street)");
 "table(subset(value, 0, 5), FirstName, LastName)"
 
 // Step 3: Add property extraction for complex data
-"table(subset(collection_property(value, Contact), 0, 5), FirstName, LastName)"
+"table(subset(cproperty(value, Contact), 0, 5), FirstName, LastName)"
 ```
 
 ## Other Operations
@@ -377,12 +377,12 @@ writer.CliPrint(addresses, "jsonpointer(value, /0/street)");
    1. Property1 name
    1. Property2 name
    1. ...
-1. `collection_property`
-   The `collection_property` operation extracts a specific property from each element of a collection and returns an array of those property values. If the input value is not a collection.  It will be converted to a collection of a single element.
+1. `cproperty`
+   The `c` of `cproperty` stands for `collection`. `cproperty` operation extracts a specific property from each element of a collection and returns an array of those property values. If the input value is not a collection.  It will be converted to a collection of a single element.
 
    parameters:
    1. input value
-   2. property name (case sensitive)
+   2. property name (case-sensitive)
 
    ```csharp
    var people = new Person[] {
@@ -392,7 +392,7 @@ writer.CliPrint(addresses, "jsonpointer(value, /0/street)");
    };
 
    // Extract FirstName from each person
-   System.Console.Out.CliPrint(people, "collection_property(value, FirstName)");
+   System.Console.Out.CliPrint(people, "cproperty(value, FirstName)");
    ```
    
    The code above will print:
@@ -401,10 +401,10 @@ writer.CliPrint(addresses, "jsonpointer(value, /0/street)");
    jane
    ethan
    ```
-1. `collection_jsonpointer`
-   The `collection_jsonpointer` operation applies a JSON pointer to each element in a collection and returns an array of the extracted values. This operation first converts the input to a JSON array, then applies the specified JSON pointer to each element.
+1. `cjsonpointer`
+   The `cjsonpointer` operation applies a JSON pointer to each element in a collection and returns an array of the extracted values. This operation first converts the input to a JSON array, then applies the specified JSON pointer to each element.
 
-   Unlike `jsonpointer` which works on the entire input data, `collection_jsonpointer` processes each item in a collection individually and extracts the same JSON path from all of them.
+   Unlike `jsonpointer` which works on the entire input data, `cjsonpointer` processes each item in a collection individually and extracts the same JSON path from all of them.
 
    parameters:
    1. input collection
@@ -418,7 +418,7 @@ writer.CliPrint(addresses, "jsonpointer(value, /0/street)");
    };
 
    // Extract firstName from each person using JSON pointer
-   System.Console.Out.CliPrint(people, "collection_jsonpointer(value, /firstName)");
+   System.Console.Out.CliPrint(people, "cjsonpointer(value, /firstName)");
    ```
    
    The code above will print:
@@ -548,9 +548,9 @@ writer.CliPrint(addresses, "jsonpointer(value, /0/street)");
 | `first` | `first(collection)` | Collection | Single item | Get first element |
 | `last` | `last(collection)` | Collection | Single item | Get last element |
 | `property` | `property(object, 'path')` | Object | Property value | Access nested properties with dot/bracket notation |
-| `collection_property` | `collection_property(collection, prop)` | Collection | Array | Extract property from each element |
+| `cproperty` | `cproperty(collection, prop)` | Collection | Array | Extract property from each element |
 | `jsonpointer` | `jsonpointer(data, /path)` | Any | Extracted value | JSON pointer extraction (case-sensitive) |
-| `collection_jsonpointer` | `collection_jsonpointer(collection, /pointer)` | Collection | JSON array | JSON array with field filtering |
+| `cjsonpointer` | `cjsonpointer(collection, /pointer)` | Collection | JSON array | JSON array with field filtering |
 
 ### Common Patterns
 
@@ -562,7 +562,7 @@ writer.CliPrint(data, "json(value)");             // JSON output
 
 // Data extraction
 writer.CliPrint(contact, "property(value, 'Email')");        // Single property
-writer.CliPrint(contacts, "collection_property(value, Name)"); // Property from each item
+writer.CliPrint(contacts, "cproperty(value, Name)"); // Property from each item
 writer.CliPrint(data, "jsonpointer(value, /users/0/name)");   // JSON pointer
 
 // Collection operations  

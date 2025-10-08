@@ -81,9 +81,9 @@ Format operations use prefix notation with `value` as the built-in data variable
 - `"list(value, Column)"` - Key-value list format
 - `"first(value, N)"` / `"last(value, N)"` - Extract N items from collections
 - `"property(value, 'path')"` - Access nested properties: `'address[0].street'`
-- `"collection_property(value, propname)"` - Extract property from collection elements
+- `"cproperty(value, propname)"` - Extract property from collection elements
 - `"jsonpointer(value, /path/field)"` - JSON pointer extraction
-- `"collection_jsonpointer(value, /pointer)"` - JSON array with field filtering
+- `"cjsonpointer(value, /pointer)"` - JSON array with field filtering
 
 ### Chaining Examples
 ```bash
@@ -97,7 +97,7 @@ dotnet run --project Sample -- collection contact --count 5 --format "table(firs
 dotnet run --project Sample -- single contact --format "property(value, 'Email')"
 
 # Extract property from collection elements
-dotnet run --project Sample -- collection contact --format "collection_property(value, FirstName)"
+dotnet run --project Sample -- collection contact --format "cproperty(value, FirstName)"
 
 # JSON pointer extraction from first item
 dotnet run --project Sample -- use-case json-pointer  # Uses "jsonpointer(value, /0/street)"
@@ -111,13 +111,13 @@ dotnet run --project Sample -- use-case json-pointer  # Uses "jsonpointer(value,
 | **csv** | `csv(collection, [cols...])` | Collection | CSV string | `csv(value, Name, Age)` |
 | **ccsv** | `ccsv(collection, [cols...])` | Collection | CSV no headers | `ccsv(value, Name)` |
 | **json** | `json(data)` | Any | JSON string | `json(value)` |
-| **collection_jsonpointer** | `collection_jsonpointer(collection, pointer)` | Collection | JSON array | `collection_jsonpointer(value, /Name)` |
+| **cjsonpointer** | `cjsonpointer(collection, pointer)` | Collection | JSON array | `cjsonpointer(value, /Name)` |
 | **jsonpointer** | `jsonpointer(data, /path)` | Any | Extracted value | `jsonpointer(value, /0/street)` |
 | **list** | `list(collection, [col])` | Collection | Key-value list | `list(value, Name)` |
 | **first** | `first(collection, [count])` | Collection | First N items | `first(value, 3)` |
 | **last** | `last(collection, [count])` | Collection | Last N items | `last(value, 2)` |
 | **property** | `property(object, 'path')` | Object | Property value | `property(value, 'Email')` |
-| **collection_property** | `collection_property(collection, prop)` | Collection | Property from elements | `collection_property(value, Name)` |
+| **cproperty** | `cproperty(collection, prop)` | Collection | Property from elements | `cproperty(value, Name)` |
 
 ### Implementation Notes
 - Operations registered in `Extensions.BuildCustomParser()` via `PrefixExpressionFactory<T>`
