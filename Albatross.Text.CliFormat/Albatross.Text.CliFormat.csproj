@@ -9,17 +9,17 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	  <NoWarn>1701;1702;1591</NoWarn>
+		<NoWarn>1701;1702;1591</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-	  <NoWarn>1701;1702;1591</NoWarn>
+		<NoWarn>1701;1702;1591</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Albatross.Text.Table\Albatross.Text.Table.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Albatross.Reflection" Version="8.0.4" />
-		<PackageReference Include="Albatross.Expression" Version="4.0.0-248.main" />
+		<PackageReference Include="Albatross.Expression" Version="4.0.0" />
 		<PackageReference Include="Albatross.Serialization.Json" Version="9.0.0" />
 		<PackageReference Include="CsvHelper" Version="33.1.0" />
 	</ItemGroup>
