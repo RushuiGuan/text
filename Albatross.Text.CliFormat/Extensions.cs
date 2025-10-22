@@ -44,6 +44,7 @@ namespace Albatross.Text.CliFormat {
 		/// Prints the specified value using a CLI format expression, with automatic format detection if no format is specified.
 		/// </summary>
 		/// <typeparam name="T">The type of the value to print.</typeparam>
+		/// <param name="writer"></param>
 		/// <param name="value">The value to format and print to console output.</param>
 		/// <param name="format">The format expression to use. If null or empty, uses "auto(value)" for automatic format detection.</param>
 		public static TextWriter CliPrint<T>(this TextWriter writer, T value, string? format) where T : notnull {
