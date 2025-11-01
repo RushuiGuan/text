@@ -6,14 +6,26 @@ using System.Reflection;
 
 namespace Albatross.Text.Table {
 	public class TableOptionFactory {
-		object sync = new object();
-		Dictionary<Type, TableOptions> registration = new Dictionary<Type, TableOptions>();
+		readonly object sync = new object();
+		readonly Dictionary<Type, TableOptions> registration = new Dictionary<Type, TableOptions>();
+
+		public bool TryGet<T>([NotNullWhen(true)] out TableOptions<T>? options) {
+			var type = typeof(T);
+			lock (sync) {
+				if (registration.TryGetValue(type, out var found)) {
+					options = (TableOptions<T>)found;
+					return true;
+				}
+			}
+			options = null;
+			return false;
+		}
 
 		public TableOptions<T> Get<T>() {
 			var type = typeof(T);
 			lock (sync) {
-				if(!registration.TryGetValue(type, out var options)) {
-					if (!TrySimpleValueCollectionRegistration<T>(out options)){
+				if (!registration.TryGetValue(type, out var options)) {
+					if (!TrySimpleValueCollectionRegistration<T>(out options)) {
 						options = FallBackRegistration<T>();
 					}
 					registration[typeof(T)] = options;
@@ -28,8 +40,10 @@ namespace Albatross.Text.Table {
 				.MakeGenericMethod(type);
 			return (TableOptions)methodInfo.Invoke(this, [])!;
 		}
+
 		public static TableOptionFactory Instance { get; } = new TableOptionFactory();
 		public void Register<T>(TableOptions<T> options) => Register((TableOptions)options);
+
 		public void Register(TableOptions options) {
 			lock (sync) {
 				registration[options.Type] = options;
@@ -38,7 +52,7 @@ namespace Albatross.Text.Table {
 
 		internal bool TrySimpleValueCollectionRegistration<T>([NotNullWhen(true)] out TableOptions? options) {
 			var type = typeof(T);
-			if(type.IsSimpleValue()){
+			if (type.IsSimpleValue()) {
 				options = new TableOptions<T>()
 					.SetColumn<T>("Value", x => x)
 					.PrintFirstLineSeparator(false)
