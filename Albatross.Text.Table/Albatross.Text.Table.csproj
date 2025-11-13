@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<Description>Convert collection of objects into a tabular string format with fluent interface..  Can print tabular data as a table or other formats using TextWriter.</Description>
 		<PackageProjectUrl>$(RepositoryProjectRoot)/Albatross.Text.Table</PackageProjectUrl>
@@ -31,6 +31,6 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Albatross.Reflection" Version="8.0.4" />
+		<PackageReference Include="Albatross.Reflection" Version="10.0.0-44.main" />
 	</ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
-# Tests
+# tests
 Albatross.Text.Test
 
-# Packages
+# packages
 Albatross.Text
 Albatross.Text.Table
 Albatross.Text.CliFormat
