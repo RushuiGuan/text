@@ -21,7 +21,7 @@ Formats collections as tables with optional column filtering.
 ```bash
 table(value)                    # All columns
 table(value, Name, Age)         # Specific columns only
-table(first(value, 5), Name)    # Chained with other operations
+table(subset(value, 5), Name)    # Chained with other operations
 ```
 
 **Input:** Collection  
@@ -153,7 +153,7 @@ Applies JSON pointer extraction to each element in a collection.
 
 ```bash
 cjsonpointer(value, '/name')    # Extract name from each item
-cjsonpointer(value, '/address/city') # Extract city from each address
+cjsonpointer(value, '/address/city') # Extract city of the address of a collection of item.
 ```
 
 **Input:** Collection  
@@ -162,16 +162,16 @@ cjsonpointer(value, '/address/city') # Extract city from each address
 
 ## Formatting Operations
 
-### **format** - Apply .NET Format Strings
+### **cformat** - Apply .NET Format Strings
 Applies .NET format strings to collection elements.
 
 ```bash
-format(value, 'C')              # Currency format for numbers
-format(value, 'yyyy-MM-dd')     # Date format
-format(value, 'F2')             # Two decimal places
+cformat(value, 'C')              # Currency format for numbers
+cformat(value, 'yyyy-MM-dd')     # Date format
+cformat(value, 'F2')             # Two decimal places
 ```
 
-**Input:** Collection of formattable values  
+**Input:** Collection
 **Output:** Array of formatted strings  
 **Parameters:** .NET format string
 
@@ -193,7 +193,7 @@ csv(cproperty(first(value, 5), 'Name'))
 first(property(value, 'Email'))
 
 # Get formatted dates from a subset
-format(subset(cproperty(value, 'CreatedDate'), 0, 10), 'yyyy-MM-dd')
+cformat(subset(cproperty(value, 'CreatedDate'), 0, 10), 'yyyy-MM-dd')
 
 # JSON pointer on first element
 jsonpointer(first(value), '/address/street')
@@ -228,7 +228,7 @@ subset(value, 10, 20)           # Pagination
 ### Property Analysis
 ```bash
 cproperty(value, Status)        # All status values
-format(cproperty(value, Price), 'C') # Formatted prices
+cformat(cproperty(value, Price), 'C') # Formatted prices
 jsonpointer(value, '/stats/count') # Nested statistics
 ```
 
