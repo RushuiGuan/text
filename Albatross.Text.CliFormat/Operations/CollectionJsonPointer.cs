@@ -1,11 +1,10 @@
 ﻿using Albatross.Expression;
 using Albatross.Expression.Prefix;
-using Json.Pointer;
 using System.Text.Json;
 
 namespace Albatross.Text.CliFormat.Operations {
-	public class ElementJson : PrefixExpression {
-		public ElementJson() : base("cjsonpointer", 2, 2) {
+	public class CollectionJsonPointer : PrefixExpression {
+		public CollectionJsonPointer() : base("cjsonpointer", 2, 2) {
 		}
 
 		protected override object Run(List<object> operands) {
@@ -13,11 +12,11 @@ namespace Albatross.Text.CliFormat.Operations {
 			var pointer = global::Json.Pointer.JsonPointer.Parse(operands[1].ConvertToString());
 			var array = new System.Text.Json.Nodes.JsonArray();
 			foreach (var item in list) {
-				var elem = JsonSerializer.SerializeToElement(item, elementType, FormattedJsonSerialization.Instance.Value);
+				var elem = JsonSerializer.SerializeToElement(item, elementType);
 				var extracted = pointer.Evaluate(elem);
 				array.Add(extracted);
 			}
-			return JsonSerializer.SerializeToElement(array, FormattedJsonSerialization.Instance.Value);
+			return JsonSerializer.SerializeToElement(array);
 		}
 	}
 }

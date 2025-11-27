@@ -31,6 +31,6 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Albatross.Reflection" Version="10.0.0-44.main" />
+		<PackageReference Include="Albatross.Reflection" Version="8.0.6" />
 	</ItemGroup>
 </Project>

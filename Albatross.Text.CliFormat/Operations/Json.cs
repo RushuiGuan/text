@@ -20,7 +20,7 @@ namespace Albatross.Text.CliFormat.Operations {
 		/// <param name="operands">The operands list containing the object to serialize and optionally a JSON pointer for data extraction.</param>
 		/// <returns>A formatted JSON string. If a JSON pointer is provided, returns only the extracted portion.</returns>
 		protected override object Run(List<object> operands) {
-			return JsonSerializer.SerializeToElement(operands[0], FormattedJsonSerialization.Instance.Value);
+			return JsonSerializer.SerializeToElement(operands[0]);
 		}
 	}
 }

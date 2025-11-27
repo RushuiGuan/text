@@ -10,7 +10,7 @@ namespace Albatross.Text.CliFormat.Operations {
 
 		protected override object Run(List<object> operands) {
 			var pointer = global::Json.Pointer.JsonPointer.Parse(operands[1].ConvertToString());
-			var doc = JsonSerializer.SerializeToElement(operands[0], FormattedJsonSerialization.Instance.Value);
+			var doc = JsonSerializer.SerializeToElement(operands[0]);
 			return pointer.Evaluate(doc) ?? JsonDocument.Parse("null").RootElement;
 		}
 	}

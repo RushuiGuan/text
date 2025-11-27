@@ -1,7 +1,6 @@
 ﻿using Albatross.Expression;
 using Albatross.Expression.Parsing;
 using Albatross.Reflection;
-using Albatross.Serialization.Json;
 using Albatross.Text.CliFormat.Operations;
 using Albatross.Text.Table;
 using System.Collections;
@@ -25,7 +24,7 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new CustomVariableFactory());
 			builder.AddFactory(new JsonPointerLiteralFactory());
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Json>(false));
-			builder.AddFactory(new PrefixExpressionFactory<Operations.ElementJson>(false));
+			builder.AddFactory(new PrefixExpressionFactory<Operations.CollectionJsonPointer>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.JsonPointer>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.Csv>(false));
 			builder.AddFactory(new PrefixExpressionFactory<Operations.CompactCsv>(false));
@@ -39,6 +38,12 @@ namespace Albatross.Text.CliFormat {
 			builder.AddFactory(new PrefixExpressionFactory<Operations.CollectionFormat>(false));
 			return new Parser(builder.Factories, false);
 		}
+
+		readonly static JsonSerializerOptions jsonSerializerOptions = new() {
+			WriteIndented = true,
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+			DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
+		};
 
 		/// <summary>
 		/// Prints the specified value using a CLI format expression, with automatic format detection if no format is specified.
@@ -70,7 +75,7 @@ namespace Albatross.Text.CliFormat {
 					new StringTable((IEnumerable)result, options).Print(writer);
 				}
 			} else if (result is JsonElement element) {
-				writer.WriteLine(JsonSerializer.Serialize(element, FormattedJsonSettings.Instance.Value));
+				writer.WriteLine(JsonSerializer.Serialize(element, jsonSerializerOptions));
 			} else {
 				var dictionary = new Dictionary<string, object>();
 				result.ToDictionary(dictionary);
