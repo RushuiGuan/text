@@ -77,7 +77,7 @@ namespace Albatross.Text {
 		public static bool Like(this string? text, string globPattern) {
 			if (string.IsNullOrEmpty(text)) { return false; }
 			if (globPattern == null) { throw new ArgumentException($"{nameof(globPattern)} cannot be null"); }
-			string pattern = $"^{Regex.Escape(globPattern).Replace(@"\*", ".*").Replace(@"\?", ".")}$";a
+			string pattern = $"^{Regex.Escape(globPattern).Replace(@"\*", ".*").Replace(@"\?", ".")}$";
 			var regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
 			return regex.IsMatch(text);
 		}
