@@ -17,7 +17,7 @@ namespace Albatross.Text {
 		[return: NotNullIfNotNull(nameof(text))]
 		public static string? ProperCase(this string? text, CultureInfo? culture = null) {
 			if (!string.IsNullOrEmpty(text)) {
-				string result = text.Substring(0, 1).ToUpper(culture ?? CultureInfo.CurrentCulture);
+				string result = text!.Substring(0, 1).ToUpper(culture ?? CultureInfo.CurrentCulture);
 				if (text.Length > 1) {
 					result = result + text.Substring(1);
 				}
@@ -44,7 +44,7 @@ namespace Albatross.Text {
 		[return: NotNullIfNotNull(nameof(text))]
 		public static string? CamelCase(this string? text, CultureInfo? culture = null) {
 			if (!string.IsNullOrEmpty(text)) {
-				if (char.IsLower(text[0])) {
+				if (char.IsLower(text![0])) {
 					return text;
 				} else {
 					int marker = 0;
@@ -90,7 +90,7 @@ namespace Albatross.Text {
 		/// <returns></returns>
 		[return: NotNullIfNotNull(nameof(text))]
 		public static string? PostfixIfNotNullOrEmpty(this string? text, char character) {
-			if (!string.IsNullOrEmpty(text) && !text.EndsWith(character)) {
+			if (!string.IsNullOrEmpty(text) && !text!.EndsWith($"{character}")) {
 				return text + character;
 			} else {
 				return text;
