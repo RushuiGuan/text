@@ -9,6 +9,12 @@ namespace Albatross.Text {
 			writer.Write(obj);
 			return writer;
 		}
+		public static TextWriter AppendIf(this TextWriter writer, bool condition, object obj) {
+			if (condition) {
+				writer.Write(obj);
+			}
+			return writer;
+		}
 		public static TextWriter AppendBooleanAsBit(this TextWriter writer, bool value) {
 			if (value) {
 				writer.Write(1);
