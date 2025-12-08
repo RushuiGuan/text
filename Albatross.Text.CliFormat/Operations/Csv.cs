@@ -59,7 +59,7 @@ namespace Albatross.Text.CliFormat.Operations {
 				writer.Context.RegisterClassMap(classMap!);
 				writer.WriteRecords(items);
 			}
-			return textWriter.ToString();
+			return textWriter.ToString().TrimEnd('\r', '\n');
 		}
 	}
 }
