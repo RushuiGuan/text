@@ -23,7 +23,7 @@ namespace Albatross.Text.Test {
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0M };
 			var writer = new StringWriter();
 			new[] { obj }.MarkdownTable(writer, options);
-			writer.ToString().NormalizeLineEnding().Should().Be("Id|Name|Value\n-|-|-\n1|name|1\n");
+			writer.ToString().NormalizeLineEnding().Should().Be("Id|Name|Value\n-|-|-\n1|name|1");
 		}
 
 		[Fact]
@@ -40,7 +40,7 @@ namespace Albatross.Text.Test {
 			var writer = new StringWriter();
 			table.Print(writer);
 			writer.ToString().NormalizeLineEnding()
-				.Should().Be("Id Name Value\n-------------\n1  name 1    \n-------------\n");
+				.Should().Be("Id Name Value\n-------------\n1  name 1    \n-------------");
 		}
 
 
@@ -58,7 +58,7 @@ namespace Albatross.Text.Test {
 			Assert.Equal(5, table.Columns[3].MaxTextWidth);
 			var writer = new StringWriter();
 			table.Print(writer);
-			writer.ToString().NormalizeLineEnding().Should().Be("Markdown Id Name Value\n----------------------\n[Google](https://www.google.com)   1  name 1    \n----------------------\n");
+			writer.ToString().NormalizeLineEnding().Should().Be("Markdown Id Name Value\n----------------------\n[Google](https://www.google.com)   1  name 1    \n----------------------");
 		}
 
 		[Fact]
@@ -70,7 +70,7 @@ namespace Albatross.Text.Test {
 			};
 			var writer = new StringWriter();
 			dict.StringTable().Print(writer);
-			writer.ToString().NormalizeLineEnding().Should().Be("Key  Value \n-----------\nKey1 Value1\nKey2 Value2\nKey3 Value3\n-----------\n");
+			writer.ToString().NormalizeLineEnding().Should().Be("Key  Value \n-----------\nKey1 Value1\nKey2 Value2\nKey3 Value3\n-----------");
 		}
 		[Fact]
 		public void TestStringArray() {
@@ -81,7 +81,7 @@ namespace Albatross.Text.Test {
 			};
 			var writer = new StringWriter();
 			array.StringTable().Print(writer);
-			writer.ToString().NormalizeLineEnding().Should().Be("Value1\nValue2\nValue3\n");
+			writer.ToString().NormalizeLineEnding().Should().Be("Value1\nValue2\nValue3");
 		}
 	}
 }
