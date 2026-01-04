@@ -6,6 +6,7 @@ using Albatross.Text.CliFormat.Operations;
 using Albatross.Text.Table;
 using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Text.Json;
 
@@ -49,6 +50,7 @@ namespace Albatross.Text.CliFormat {
 			DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
 		};
 
+		[return: NotNullIfNotNull(nameof(format))]
 		public static IExpression? CreateExpression(string? format) {
 			if (string.IsNullOrEmpty(format)) {
 				return null;
