@@ -28,7 +28,7 @@ namespace Albatross.Text {
 			});
 		}
 
-		[Obsolete("Use Interpolate(this string, Func<string, string>, bool) instead.")]
+		[Obsolete("Use Interpolate(this string, Func<string, string>, bool) instead.  This method will be removed in the next release.  The dependency to Microsoft.Extensions.Logging.Abstractions will also be removed")]
 		public static string Interpolate<T>(this string input, Func<string, T, string> func, T value, bool throwException = false, ILogger? logger = null) {
 			return ExpressionSearchRegex.Replace(input, (match) => {
 				string expression = match.Groups[1].Value;
