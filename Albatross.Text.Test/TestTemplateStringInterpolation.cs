@@ -20,7 +20,7 @@ namespace Albatross.Text.Test {
 		[InlineData("abc${b}abc", "abc1abc")]
 		[InlineData("${b}${b}${b}", "111")]
 		public void Test(string input, string expectedResult) {
-			var result = input.Interpolate((key, values) => values[key], values);
+			var result = input.Interpolate((key, values) => values[key], values, false);
 			Assert.Equal(expectedResult, result);
 		}
 
