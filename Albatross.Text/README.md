@@ -12,7 +12,7 @@ A comprehensive .NET string manipulation library providing extension methods for
 
 ## Documentation
 
-- **[Complete API Documentation](https://github.com/RushuiGuan/text/blob/main/Albatross.Text/README.md)** - Detailed usage examples and API reference
+- **[Complete API Documentation](https://rushuiguan.github.io/text/)** - Detailed usage examples and API reference
 - **[Source Code](https://github.com/RushuiGuan/text/tree/main/Albatross.Text)** - Browse the implementation
 
 ## Related Packages
