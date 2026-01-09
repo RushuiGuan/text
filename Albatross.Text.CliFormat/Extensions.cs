@@ -1,9 +1,13 @@
 ﻿using Albatross.Expression;
+using Albatross.Expression.Nodes;
 using Albatross.Expression.Parsing;
 using Albatross.Reflection;
 using Albatross.Text.CliFormat.Operations;
 using Albatross.Text.Table;
 using System.Collections;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Text.Json;
 
 namespace Albatross.Text.CliFormat {
@@ -11,6 +15,7 @@ namespace Albatross.Text.CliFormat {
 	/// Provides extension methods and utilities for CLI text formatting operations.
 	/// </summary>
 	public static class Extensions {
+		public readonly static Lazy<IParser> DefaultParser = new(() => BuildCustomParser());
 		/// <summary>
 		/// Builds a custom expression parser configured with factories for various text formatting operations.
 		/// </summary>
@@ -45,6 +50,15 @@ namespace Albatross.Text.CliFormat {
 			DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
 		};
 
+		[return: NotNullIfNotNull(nameof(format))]
+		public static IExpression? CreateExpression(string? format) {
+			if (string.IsNullOrEmpty(format)) {
+				return null;
+			} else {
+				return DefaultParser.Value.Build(format);
+			}
+		}
+
 		/// <summary>
 		/// Prints the specified value using a CLI format expression, with automatic format detection if no format is specified.
 		/// </summary>
@@ -53,36 +67,44 @@ namespace Albatross.Text.CliFormat {
 		/// <param name="value">The value to format and print to console output.</param>
 		/// <param name="format">The format expression to use. If null or empty, uses "auto(value)" for automatic format detection.</param>
 		public static TextWriter CliPrint<T>(this TextWriter writer, T value, string? format) where T : notnull {
+			var expression = CreateExpression(format);
+			return CliPrintWithExpression(writer, value, expression);
+		}
+
+		public static TextWriter CliPrintWithExpression<T>(this TextWriter writer, T value, IExpression? expression) where T : notnull {
 			object result;
-			if (string.IsNullOrEmpty(format)) {
+			if (expression == null) {
 				result = value;
 			} else {
-				var parser = BuildCustomParser();
-				var expr = parser.Build(format);
-				var context = new CustomExecutionContext<T>(parser);
-				result = expr.Eval(name => context.GetValue(name, value));
+				var context = new CustomExecutionContext<T>(DefaultParser.Value);
+				result = expression.Eval(name => context.GetValue(name, value));
 			}
-			var type = result.GetType();
+			return writer.Print<T>(result);
+		}
+
+		public static TextWriter Print<T>(this TextWriter writer, object value) where T : notnull {
+			var type = value.GetType();
 			if (type.IsSimpleValue()) {
-				writer.WriteLine(TableOptions.DefaultFormat(result));
-			} else if (result is StringTable stringTable) {
+				writer.WriteLine(TableOptions.DefaultFormat(value));
+			} else if (value is StringTable stringTable) {
 				stringTable.Print(writer);
 			} else if (type.TryGetGenericCollectionElementType(out var elementType)) {
 				if (typeof(IDictionary).IsAssignableFrom(elementType)) {
-					PrintDictionaryList((IEnumerable<IDictionary>)result, writer);
+					PrintDictionaryList((IEnumerable<IDictionary>)value, writer);
 				} else {
 					var options = TableOptionFactory.Instance.Get(elementType);
-					new StringTable((IEnumerable)result, options).Print(writer);
+					new StringTable((IEnumerable)value, options).Print(writer);
 				}
-			} else if (result is JsonElement element) {
+			} else if (value is JsonElement element) {
 				writer.WriteLine(JsonSerializer.Serialize(element, jsonSerializerOptions));
 			} else {
 				var dictionary = new Dictionary<string, object>();
-				result.ToDictionary(dictionary);
+				value.ToDictionary(dictionary);
 				dictionary.StringTable().Print(writer);
 			}
 			return writer;
 		}
+
 
 		static void PrintDictionaryList(IEnumerable<IDictionary> list, TextWriter writer) {
 			var tables = new List<StringTable>();
