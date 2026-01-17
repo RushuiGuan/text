@@ -1,21 +1,65 @@
-# Albatross.Text
-[![NuGet Version](https://img.shields.io/nuget/v/Albatross.Text)](https://www.nuget.org/packages/Albatross.Text)
+# Albatross Text Libraries
 
-A comprehensive .NET string manipulation library providing extension methods for strings, StringBuilder, and TextWriter classes.
+A collection of .NET libraries for string manipulation and text formatting.
 
-## Features
-- **Targets** - .NET Standard 2.0, .NET 8.0+
-- **String Interpolation** - Advanced `${expression}` syntax for dynamic value replacement
-- **String Extensions** - Case conversion, wildcard matching, custom trimming methods
-- **StringBuilder Extensions** - Enhanced StringBuilder functionality with EndsWith methods
-- **TextWriter Extensions** - Fluent API for formatted text writing with specialized character methods
+---
 
-# Albatross.Text.Table
-[![NuGet Version](https://img.shields.io/nuget/v/Albatross.Text.Table)](https://www.nuget.org/packages/Albatross.Text.Table)
+## Albatross.Text
 
-A .NET library that converts collections of objects into tabular string format with fluent interface. Print tabular data to console or any TextWriter with customizable width limitations and text truncation behavior for each column.
+A string manipulation library providing extension methods for strings, StringBuilder, and TextWriter.
 
-# Albatross.Text.CliFormat
-[![NuGet Version](https://img.shields.io/nuget/v/Albatross.Text.CliFormat)](https://www.nuget.org/packages/Albatross.Text.CliFormat)
+[![NuGet](https://img.shields.io/nuget/v/Albatross.Text)](https://www.nuget.org/packages/Albatross.Text) | [Source Code](https://github.com/RushuiGuan/text/tree/main/Albatross.Text)
 
-A .NET library that provides flexible text formatting for CLI applications using runtime format expressions. Transform collections and objects into various output formats like tables, CSV, JSON, and custom layouts through a expression-based system.
+**Key Features:**
+- Case conversion (`CamelCase`, `ProperCase`)
+- Glob pattern matching (`Like`)
+- String interpolation with `${expression}` syntax
+- TextWriter fluent API
+- StringBuilder extensions
+
+```csharp
+"HelloWorld".CamelCase();              // "helloWorld"
+"hello.txt".Like("*.txt");             // true
+"Hello ${name}".Interpolate(e => "World");
+```
+
+---
+
+## Albatross.Text.Table
+
+A library for rendering collections as formatted text tables with automatic column width adjustment.
+
+[![NuGet](https://img.shields.io/nuget/v/Albatross.Text.Table)](https://www.nuget.org/packages/Albatross.Text.Table) | [Source Code](https://github.com/RushuiGuan/text/tree/main/Albatross.Text.Table)
+
+**Key Features:**
+- Auto-discover columns via reflection
+- Fluent API for column configuration
+- Width control with text truncation
+- Factory pattern for reusable configurations
+- Markdown table export
+
+```csharp
+var products = new[] { new { Name = "Laptop", Price = 999.99m } };
+products.StringTable().Print(Console.Out);
+```
+
+---
+
+## Albatross.Text.CliFormat
+
+A library for formatting data using runtime expressions into tables, CSV, JSON, and more.
+
+[![NuGet](https://img.shields.io/nuget/v/Albatross.Text.CliFormat)](https://www.nuget.org/packages/Albatross.Text.CliFormat) | [Source Code](https://github.com/RushuiGuan/text/tree/main/Albatross.Text.CliFormat)
+
+**Key Features:**
+- Expression-based formatting (`table`, `csv`, `json`, `list`)
+- Chainable operations
+- Property access with dot notation
+- JSON pointer support
+- Auto-detect output format
+
+```csharp
+Console.Out.CliPrint(data, "table(value, Name, Age)");
+Console.Out.CliPrint(data, "csv(subset(value, 0, 5))");
+Console.Out.CliPrint(data, "json(value)");
+```
