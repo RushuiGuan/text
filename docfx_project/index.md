@@ -1,4 +1,4 @@
-# Albatross Text Libraries
+# Albatross Text Library
 
 A collection of .NET libraries for string manipulation and text formatting.
 
@@ -8,7 +8,7 @@ A collection of .NET libraries for string manipulation and text formatting.
 
 A string manipulation library providing extension methods for strings, StringBuilder, and TextWriter.
 
-[![NuGet](https://img.shields.io/nuget/v/Albatross.Text)](https://www.nuget.org/packages/Albatross.Text) | [Source Code](https://github.com/RushuiGuan/text/tree/main/Albatross.Text)
+[![NuGet](https://img.shields.io/nuget/v/Albatross.Text)](https://www.nuget.org/packages/Albatross.Text)
 
 **Key Features:**
 - Case conversion (`CamelCase`, `ProperCase`)
@@ -29,7 +29,7 @@ A string manipulation library providing extension methods for strings, StringBui
 
 A library for rendering collections as formatted text tables with automatic column width adjustment.
 
-[![NuGet](https://img.shields.io/nuget/v/Albatross.Text.Table)](https://www.nuget.org/packages/Albatross.Text.Table) | [Source Code](https://github.com/RushuiGuan/text/tree/main/Albatross.Text.Table)
+[![NuGet](https://img.shields.io/nuget/v/Albatross.Text.Table)](https://www.nuget.org/packages/Albatross.Text.Table)
 
 **Key Features:**
 - Auto-discover columns via reflection
@@ -49,7 +49,7 @@ products.StringTable().Print(Console.Out);
 
 A library for formatting data using runtime expressions into tables, CSV, JSON, and more.
 
-[![NuGet](https://img.shields.io/nuget/v/Albatross.Text.CliFormat)](https://www.nuget.org/packages/Albatross.Text.CliFormat) | [Source Code](https://github.com/RushuiGuan/text/tree/main/Albatross.Text.CliFormat)
+[![NuGet](https://img.shields.io/nuget/v/Albatross.Text.CliFormat)](https://www.nuget.org/packages/Albatross.Text.CliFormat)
 
 **Key Features:**
 - Expression-based formatting (`table`, `csv`, `json`, `list`)
@@ -63,3 +63,9 @@ Console.Out.CliPrint(data, "table(value, Name, Age)");
 Console.Out.CliPrint(data, "csv(subset(value, 0, 5))");
 Console.Out.CliPrint(data, "json(value)");
 ```
+
+---
+
+## Source Code
+
+[GitHub Repository](https://github.com/RushuiGuan/text)

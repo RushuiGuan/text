@@ -39,8 +39,8 @@
       "modern"
     ],
     "globalMetadata": {
-      "_appName": "Albatross Text Library",
-      "_appTitle": "Albatross Text Library",
+      "_appName": "Albatross Text",
+      "_appTitle": ".NET String Manipulation and Formatting",
       "_appLogoPath": "./images/logo.svg",
       "_appFaviconPath": "./images/favicon.svg",
       "_enableSearch": true,
