@@ -214,10 +214,22 @@ namespace Albatross.Text {
 			return numberText;
 		}
 
+		/// <summary>
+		/// Creates a markdown-formatted hyperlink.
+		/// </summary>
+		/// <param name="text">The display text for the link.</param>
+		/// <param name="url">The URL target.</param>
+		/// <returns>A string in the format [text](url).</returns>
 		public static string MarkdownLink(string text, string url) {
 			return $"[{text}]({url})";
 		}
 
+		/// <summary>
+		/// Creates a Slack-formatted hyperlink.
+		/// </summary>
+		/// <param name="text">The display text for the link.</param>
+		/// <param name="url">The URL target.</param>
+		/// <returns>A string in the format &lt;url|text&gt;.</returns>
 		public static string SlackLink(string text, string url) {
 			return $"<{url}|{text}>";
 		}

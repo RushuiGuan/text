@@ -5,7 +5,13 @@ using System.IO;
 using System.Linq;
 
 namespace Albatross.Text.Table {
+	/// <summary>
+	/// Renders collections as formatted text tables with automatic column width adjustment, text truncation, and alignment.
+	/// </summary>
 	public class StringTable {
+		/// <summary>
+		/// Represents a table column with width management and text alignment capabilities.
+		/// </summary>
 		public record class Column {
 			public Column(string name, int index) {
 				Name = name;
@@ -13,7 +19,14 @@ namespace Albatross.Text.Table {
 				SetMaxTextWidth(name.Length);
 			}
 
+			/// <summary>
+			/// The zero-based position of this column in the table.
+			/// </summary>
 			public int Index { get; }
+
+			/// <summary>
+			/// The column header name.
+			/// </summary>
 			public string Name { get; }
 
 			/// <summary>
@@ -29,20 +42,40 @@ namespace Albatross.Text.Table {
 			}
 
 			/// <summary>
-			/// The minimum width of this column.  If set to 0, the column will be hidden
+			/// The minimum width of this column. If set to 0, the column will be hidden.
 			/// </summary>
 			public int MinWidth { get; set; } = int.MaxValue;
 
+			/// <summary>
+			/// The current display width after any width adjustments.
+			/// </summary>
 			public int DisplayWidth { get; internal set; }
+
+			/// <summary>
+			/// The actual width including spacing (DisplayWidth + 1 for separator, or 0 if hidden).
+			/// </summary>
 			public int ActualWidth => DisplayWidth == 0 ? 0 : DisplayWidth + 1;
+
+			/// <summary>
+			/// Whether to right-align text in this column. Default is left-aligned.
+			/// </summary>
 			public bool AlignRight { get; set; }
 
+			/// <summary>
+			/// Formats a TextValue for display in this column, applying truncation or padding as needed.
+			/// </summary>
 			public string GetText(TextValue value) {
 				return value.GetText(DisplayWidth, AlignRight);
 			}
 		}
 
+		/// <summary>
+		/// Represents a single data row containing values for each column.
+		/// </summary>
 		public class Row {
+			/// <summary>
+			/// The cell values in column order.
+			/// </summary>
 			public TextValue[] Values { get; }
 
 			public Row(params TextValue[] values) {
@@ -52,16 +85,42 @@ namespace Albatross.Text.Table {
 
 		Column[] columns;
 		List<Row> rows = new List<Row>();
+
+		/// <summary>
+		/// The table's column definitions.
+		/// </summary>
 		public Column[] Columns => columns;
+
+		/// <summary>
+		/// The data rows in the table.
+		/// </summary>
 		public IEnumerable<Row> Rows => rows;
+
+		/// <summary>
+		/// Whether to print column headers. Default is true.
+		/// </summary>
 		public bool PrintHeader { get; init; } = true;
+
+		/// <summary>
+		/// Whether to print a separator line after the header. Default is true.
+		/// </summary>
 		public bool PrintFirstLineSeparator { get; init; } = true;
+
+		/// <summary>
+		/// Whether to print a separator line after the last row. Default is true.
+		/// </summary>
 		public bool PrintLastLineSeparator { get; init; } = true;
 
+		/// <summary>
+		/// Creates a table with the specified column headers.
+		/// </summary>
 		public StringTable(params IEnumerable<string> headers) {
 			columns = headers.Select((x, index) => new Column(x, index)).ToArray();
 		}
 
+		/// <summary>
+		/// Creates a table from a collection using the provided configuration.
+		/// </summary>
 		public StringTable(IEnumerable items, TableOptions options) : this(options.Build().Select(x => x.Header)) {
 			foreach (var item in items) {
 				this.AddRow(options.GetValue(item));
@@ -71,8 +130,14 @@ namespace Albatross.Text.Table {
 			PrintLastLineSeparator = options.PrintLastLineSeparator;
 		}
 
+		/// <summary>
+		/// The total width of all visible columns including separators.
+		/// </summary>
 		public int TotalWidth => Columns.Sum(x => x.ActualWidth) - 1;
 
+		/// <summary>
+		/// Reduces column widths to fit within the specified maximum width, respecting MinWidth constraints.
+		/// </summary>
 		public void AdjustColumnWidth(int maxWidth) {
 			var overflow = TotalWidth - maxWidth;
 			if (overflow > 0) {
@@ -101,8 +166,15 @@ namespace Albatross.Text.Table {
 			}
 		}
 
+		/// <summary>
+		/// Adds a row with string values.
+		/// </summary>
 		public void AddRow(params IEnumerable<string> values) => this.AddRow(values.Select(x => new TextValue(x)));
 
+		/// <summary>
+		/// Adds a row with TextValue entries, updating column width tracking.
+		/// </summary>
+		/// <exception cref="ArgumentException">Thrown when the value count doesn't match the column count.</exception>
 		public void AddRow(params IEnumerable<TextValue> values) {
 			var array = values.ToArray();
 			if (array.Length != columns.Length) {
@@ -114,6 +186,9 @@ namespace Albatross.Text.Table {
 			}
 		}
 
+		/// <summary>
+		/// Outputs the table to a TextWriter with headers, separators, and formatted data rows.
+		/// </summary>
 		public void Print(TextWriter writer, bool? printHeader = null, bool? printFirstLineSeparator = null, bool? printLastLineSeparator = null) {
 			var visibleColumns = this.Columns.Where(x => x.DisplayWidth > 0).ToArray();
 			var header = string.Join(" ", visibleColumns.Select(x => x.GetText(new TextValue(x.Name))));
@@ -133,6 +208,10 @@ namespace Albatross.Text.Table {
 			}
 		}
 
+		/// <summary>
+		/// Creates a new table with only the specified columns.
+		/// </summary>
+		/// <param name="columns">Column names to include. If empty, returns the original table.</param>
 		public StringTable FilterColumns(params string[] columns) {
 			if (columns.Length == 0) {
 				return this;
@@ -152,6 +231,12 @@ namespace Albatross.Text.Table {
 			return stringTable;
 		}
 
+		/// <summary>
+		/// Creates a new table containing only rows that match the predicate.
+		/// </summary>
+		/// <param name="column">The column to test, or null to test all columns.</param>
+		/// <param name="predicate">Returns true for rows to include.</param>
+		/// <exception cref="ArgumentException">Thrown when the specified column doesn't exist.</exception>
 		public StringTable FilterRows(string? column, Func<string, bool> predicate) {
 			int? columnIndex = null;
 			if (!string.IsNullOrEmpty(column)) {
