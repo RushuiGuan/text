@@ -50,6 +50,9 @@ namespace Albatross.Text.CliFormat {
 			DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
 		};
 
+		/// <summary>
+		/// Parses a format string into an expression tree. Returns null if format is null or empty.
+		/// </summary>
 		[return: NotNullIfNotNull(nameof(format))]
 		public static IExpression? CreateExpression(string? format) {
 			if (string.IsNullOrEmpty(format)) {
@@ -71,6 +74,9 @@ namespace Albatross.Text.CliFormat {
 			return CliPrintWithExpression(writer, value, expression);
 		}
 
+		/// <summary>
+		/// Prints the value using a pre-parsed expression. If expression is null, prints the value using automatic format detection.
+		/// </summary>
 		public static TextWriter CliPrintWithExpression<T>(this TextWriter writer, T value, IExpression? expression) where T : notnull {
 			object result;
 			if (expression == null) {
@@ -82,6 +88,9 @@ namespace Albatross.Text.CliFormat {
 			return writer.Print<T>(result);
 		}
 
+		/// <summary>
+		/// Prints a value to the writer with automatic format detection based on value type (table for collections, property list for objects).
+		/// </summary>
 		public static TextWriter Print<T>(this TextWriter writer, object value) where T : notnull {
 			var type = value.GetType();
 			if (type.IsSimpleValue()) {

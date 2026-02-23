@@ -1,349 +1,372 @@
 # Albatross.Text.Table
 
-A .NET library that converts collections of objects into tabular string format with fluent interface. Print tabular data to console or any TextWriter with customizable width limitations and text truncation behavior for each column.
-
-## Features
-
-* **[StringTable](./StringTable.cs)** - Core class that stores tabular data in string format and provides methods to print data to a `TextWriter` with width limitations and customizable truncation behavior
-* **[TableOptions\<T\>](./TableOptions.cs)** - Configuration class that defines how to convert instances of `IEnumerable<T>` into tabular text format
-* **[TableOptionFactory](./TableOptionFactory.cs)** - Thread-safe factory class for managing and reusing `TableOptions<T>` instances with a global registry
-* **Flexible Column Configuration** - Set custom headers, formatting, ordering, and data extraction for each column
-* **Console Width Adaptation** - Automatically adjusts table width to fit console or custom width constraints
-* **Text Truncation Control** - Configure truncation behavior individually for each column
-* **Markdown Table Support** - Export collections as markdown tables
-* **Dictionary and Array Support** - Built-in support for dictionaries and arrays
-
-## Prerequisites
-
-- .NET SDK 6.0 or later
-- Target frameworks supported:
-  - .NET 8.0
-  - .NET 9.0
+A .NET library for rendering collections as formatted text tables with automatic column width adjustment and customizable formatting.
 
 ## Installation
 
-### Package Manager
-```bash
-Install-Package Albatross.Text.Table
-```
-
-### .NET CLI
 ```bash
 dotnet add package Albatross.Text.Table
 ```
 
-### Build from Source
-```bash
-# Clone the repository
-git clone https://github.com/RushuiGuan/text.git
-cd text
-
-# Restore dependencies
-dotnet restore
-
-# Build the project
-dotnet build --configuration Release
-
-# Run tests
-dotnet test
-```
-
-## Example Usage
-
-### Quick Start - Print Collection as Table
+## Quick Start
 
 ```csharp
 using Albatross.Text.Table;
 
-// Sample data class
-public class Product
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public decimal Price { get; set; }
-    public DateTime Date { get; set; }
-}
+public record Product(int Id, string Name, decimal Price);
 
-var products = new List<Product>
-{
-    new Product { Id = 1, Name = "Laptop", Price = 999.99m, Date = DateTime.Now },
-    new Product { Id = 2, Name = "Mouse", Price = 25.50m, Date = DateTime.Now.AddDays(-1) }
+var products = new List<Product> {
+    new(1, "Laptop", 999.99m),
+    new(2, "Mouse", 25.50m),
+    new(3, "Keyboard", 75.00m)
 };
 
-// Simple table output - uses reflection to build columns automatically
+// Print table with auto-discovered columns
 products.StringTable().Print(Console.Out);
 ```
 
-### Manual Column Configuration
-
-```csharp
-// Create table options with specific columns
-var options = new TableOptions<Product>()
-    .SetColumn(x => x.Id)
-    .SetColumn(x => x.Name) 
-    .SetColumn(x => x.Price);
-
-var table = products.StringTable(options);
-table.Print(Console.Out);
+Output:
+```
+Id Name     Price
+-- -------- ------
+1  Laptop   999.99
+2  Mouse    25.5
+3  Keyboard 75
+------------------
 ```
 
-### Automatic Column Configuration with Reflection
+---
+
+## TableOptions Configuration
+
+### Building Columns by Reflection
 
 ```csharp
-// Build columns automatically using reflection
 var options = new TableOptions<Product>()
     .BuildColumnsByReflection()
     .Cast<Product>();
 
-// Apply formatting and customization
-options.Format(x => x.Price, "C2")                    // Currency format
-       .ColumnHeader(x => x.Name, "Product Name")      // Custom header
-       .ColumnOrder(x => x.Date, -1);                  // Move Date to first position
-
-var table = products.StringTable(options);
-table.Print(Console.Out);
+products.StringTable(options).Print(Console.Out);
 ```
 
-### Global Configuration with Factory
+### Manual Column Selection
 
 ```csharp
-// Register table options globally for reuse
 var options = new TableOptions<Product>()
-    .BuildColumnsByReflection()
-    .Cast<Product>()
-    .Format(x => x.Price, "C2");
-
-TableOptionFactory.Instance.Register(options);
-
-// Use registered options anywhere in your application
-products.StringTable().Print(Console.Out); // Uses registered options automatically
-```
-
-### Dictionary and Array Support
-
-```csharp
-// Dictionary tables
-var dict = new Dictionary<string, string> {
-    { "Key1", "Value1" },
-    { "Key2", "Value2" }
-};
-dict.StringTable().Print(Console.Out);
-
-// String array tables  
-var array = new string[] { "Item1", "Item2", "Item3" };
-array.StringTable().Print(Console.Out);
-```
-
-### Markdown Table Export
-
-```csharp
-// Export as markdown table
-var options = new TableOptions<Product>()
-    .SetColumn(x => x.Id)
     .SetColumn(x => x.Name)
     .SetColumn(x => x.Price);
 
-using var writer = new StringWriter();
-products.MarkdownTable(writer, options);
-Console.WriteLine(writer.ToString());
-// Output: Id|Name|Price
-//         -|-|-
-//         1|Laptop|999.99
+products.StringTable(options).Print(Console.Out);
 ```
 
-### Width Control and Truncation
+Output:
+```
+Name     Price
+-------- ------
+Laptop   999.99
+Mouse    25.5
+Keyboard 75
+--------------
+```
+
+### Custom Headers
+
+```csharp
+var options = new TableOptions<Product>()
+    .BuildColumnsByReflection()
+    .Cast<Product>()
+    .ColumnHeader(x => x.Id, "#")
+    .ColumnHeader(x => x.Name, "Product Name")
+    .ColumnHeader(x => x.Price, "Unit Price");
+```
+
+### Column Ordering
+
+Lower order values appear first. Default order is based on property declaration.
+
+```csharp
+var options = new TableOptions<Product>()
+    .BuildColumnsByReflection()
+    .Cast<Product>()
+    .ColumnOrder(x => x.Price, -1)   // Move Price to first
+    .ColumnOrder(x => x.Name, 0)     // Name second
+    .ColumnOrder(x => x.Id, 1);      // Id last
+```
+
+### Ignoring Columns
+
+```csharp
+var options = new TableOptions<Product>()
+    .BuildColumnsByReflection()
+    .Cast<Product>()
+    .Ignore(x => x.Id);  // Remove Id column
+```
+
+### Value Formatting
+
+```csharp
+var options = new TableOptions<Product>()
+    .BuildColumnsByReflection()
+    .Cast<Product>()
+    .Format(x => x.Price, "C2");  // Currency format: $999.99
+```
+
+### Custom Value Extraction
+
+```csharp
+var options = new TableOptions<Product>()
+    .BuildColumnsByReflection()
+    .Cast<Product>()
+    .SetColumn(x => x.Name, product => product.Name.ToUpper());
+```
+
+### Custom Formatter with TextValue
+
+```csharp
+var options = new TableOptions<Product>()
+    .BuildColumnsByReflection()
+    .Cast<Product>()
+    .Format(x => x.Price, (product, value) =>
+        new TextValue(((decimal)value!).ToString("C2")));
+```
+
+---
+
+## TableOptionFactory
+
+Thread-safe singleton for registering and reusing table configurations globally.
+
+### Registering Options
+
+```csharp
+var options = new TableOptions<Product>()
+    .BuildColumnsByReflection()
+    .Cast<Product>()
+    .Format(x => x.Price, "C2")
+    .Ignore(x => x.Id);
+
+// Register globally
+TableOptionFactory.Instance.Register(options);
+
+// Now all calls use registered options automatically
+products.StringTable().Print(Console.Out);
+```
+
+### Retrieving Options
+
+```csharp
+// Get registered options (or auto-create default)
+var options = TableOptionFactory.Instance.Get<Product>();
+```
+
+---
+
+## StringTable
+
+The core class for storing and rendering tabular data.
+
+### Creating from Headers
+
+```csharp
+var table = new StringTable("Name", "Age", "City");
+table.AddRow("John", "30", "Boston");
+table.AddRow("Jane", "25", "Seattle");
+table.Print(Console.Out);
+```
+
+### Width Adjustment
+
+Automatically reduces column widths to fit within a maximum total width.
 
 ```csharp
 var table = products.StringTable();
-
-// Set minimum width for specific columns
-table.MinWidth(col => col.Name == "Name", 15)      // Minimum width for Name column
-     .MinWidth(col => col.Name == "Price", 10)     // Minimum width for Price column
-     .AdjustColumnWidth(80);                       // Total table width limit
-
+table.AdjustColumnWidth(60);  // Fit in 60 characters
 table.Print(Console.Out);
-
-// Right-align numeric columns
-table.AlignRight(col => col.Name == "Price", true);
 ```
 
-## How it Works
+### Column Minimum Width
 
-The library is built around a few key concepts:
-
-### TableOptions\<T\> - Configuration Core
-The generic `TableOptions<T>` class contains the configuration for transforming type T to string-based tabular data. It defines which columns to display, how to format values, and column ordering.
-
-Key methods:
-- **`SetColumn(x => x.Property)`** - Add a column using a property selector
-- **`BuildColumnsByReflection()`** - Automatically discover all public properties
-- **`Cast<T>()`** - Convert to strongly-typed options for fluent configuration
-- **`Format(x => x.Property, "format")`** - Apply string formatting to columns
-- **`ColumnHeader(x => x.Property, "Header")`** - Set custom column headers
-- **`ColumnOrder(x => x.Property, order)`** - Control column display order
-
-### TableOptionFactory - Global Registry
-The `TableOptionFactory` class provides a thread-safe global registry for reusing table configurations across your application. It automatically creates default configurations when none are registered.
+Set minimum width to prevent columns from being truncated too much.
 
 ```csharp
-// Register once, use everywhere
-TableOptionFactory.Instance.Register(myOptions);
-var table = myCollection.StringTable(); // Uses registered options
+var table = products.StringTable()
+    .MinWidth(col => col.Name == "Name", 20)      // Name at least 20 chars
+    .MinWidth(col => col.Name == "Price", 10);    // Price at least 10 chars
+
+table.AdjustColumnWidth(50);
+table.Print(Console.Out);
 ```
 
-### StringTable - Output Generation
-The `StringTable` class handles the actual table rendering with features like:
-- Automatic width calculation and adjustment
-- Text truncation with customizable behavior  
-- Console width adaptation
-- Support for any `TextWriter` output
-- Column alignment control
+### Right Alignment
 
-### Extension Methods
-The library provides convenient extension methods:
-- **`StringTable()`** - Convert collections to tables
-- **`MarkdownTable()`** - Export as markdown format
-- **`Print()`** - Output to any TextWriter
-- **`MinWidth()`** - Set column minimum widths
-- **`AlignRight()`** - Control column text alignment
+```csharp
+var table = products.StringTable()
+    .AlignRight(col => col.Name == "Price")
+    .AlignRight(col => col.Name == "Id");
 
-## Project Structure
-
+table.Print(Console.Out);
 ```
-Albatross.Text.Table/
-├── StringTable.cs                    # Core table rendering class
-├── StringTableExtensions.cs          # Extension methods for collections
-├── TableOptions.cs                   # Configuration classes
-├── TableOptionBuilder.cs             # Fluent builder for options
-├── TableOptionFactory.cs             # Global registry for configurations
-├── TextOptionBuilderExtensions.cs    # Builder helper extensions
-├── TableColumnOption.cs              # Column-specific configuration
-├── TextValue.cs                       # Text formatting utilities
-├── Extensions.cs                      # General utility extensions
-├── Assembly.cs                        # Assembly information
-├── Albatross.Text.Table.csproj       # Project file
-└── README.md                          # Project documentation
+
+### Filtering Columns
+
+```csharp
+var table = products.StringTable()
+    .FilterColumns("Name", "Price");  // Only show Name and Price
+
+table.Print(Console.Out);
 ```
+
+### Filtering Rows
+
+```csharp
+var table = products.StringTable()
+    .FilterRows("Price", value => decimal.Parse(value) > 50);
+
+table.Print(Console.Out);
+```
+
+### Print Options
+
+```csharp
+table.Print(
+    Console.Out,
+    printHeader: true,              // Show column headers
+    printFirstLineSeparator: true,  // Line after header
+    printLastLineSeparator: true    // Line after data
+);
+```
+
+---
+
+## Dictionary Tables
+
+```csharp
+var dict = new Dictionary<string, object> {
+    { "Name", "John" },
+    { "Age", 30 },
+    { "City", "Boston" }
+};
+
+dict.StringTable().Print(Console.Out);
+```
+
+Output:
+```
+Key  Value
+---- ------
+Name John
+Age  30
+City Boston
+-----------
+```
+
+---
+
+## Markdown Export
+
+```csharp
+using var writer = new StringWriter();
+products.MarkdownTable(writer);
+Console.WriteLine(writer.ToString());
+```
+
+Output:
+```
+Id|Name|Price
+-|-|-
+1|Laptop|999.99
+2|Mouse|25.5
+3|Keyboard|75
+```
+
+With custom options:
+```csharp
+var options = new TableOptions<Product>()
+    .SetColumn(x => x.Name)
+    .SetColumn(x => x.Price);
+
+products.MarkdownTable(writer, options);
+```
+
+---
+
+## Aligning Multiple Tables
+
+When displaying multiple tables, align their columns for consistent formatting.
+
+### AlignFirst
+
+Align all tables to match the first table's column widths.
+
+```csharp
+var tables = new[] {
+    products1.StringTable(),
+    products2.StringTable(),
+    products3.StringTable()
+};
+
+tables.AlignFirst();
+
+foreach (var table in tables) {
+    table.Print(Console.Out);
+}
+```
+
+### AlignAll
+
+Use the maximum width across all tables for each column.
+
+```csharp
+tables.AlignAll();
+```
+
+---
 
 ## API Reference
 
-### Core Classes
+### TableOptions&lt;T&gt;
 
-- **`StringTable`** - Main table rendering class with width adjustment and formatting
-- **`TableOptions<T>`** - Configuration for converting objects to table format  
-- **`TableOptionFactory`** - Global registry for table configurations
-- **`TextValue`** - Represents formatted text with display width information
-- **`TableColumnOption`** - Individual column configuration
+| Method | Description |
+|--------|-------------|
+| `BuildColumnsByReflection()` | Auto-discover columns from properties |
+| `Cast<T>()` | Convert to typed options for fluent API |
+| `SetColumn(expression)` | Add column by property expression |
+| `SetColumn(expression, getValue)` | Add column with custom value getter |
+| `Ignore(expression)` | Remove column |
+| `ColumnHeader(expression, header)` | Set custom header text |
+| `ColumnOrder(expression, order)` | Set column display order |
+| `Format(expression, format)` | Apply .NET format string |
+| `Format(expression, formatter)` | Apply custom formatter |
+| `PrintHeader(bool)` | Control header visibility |
+| `PrintFirstLineSeparator(bool)` | Control header separator |
+| `PrintLastLineSeparator(bool)` | Control footer separator |
 
-### Key Extension Methods
+### StringTable
 
-```csharp
-// Collection to table conversion
-IEnumerable<T>.StringTable(options?) -> StringTable
-IDictionary.StringTable() -> StringTable
+| Method | Description |
+|--------|-------------|
+| `AddRow(values)` | Add data row |
+| `Print(writer)` | Output to TextWriter |
+| `AdjustColumnWidth(maxWidth)` | Fit table within width |
+| `FilterColumns(columns)` | Show only specified columns |
+| `FilterRows(column, predicate)` | Filter rows by value |
 
-// Table output methods  
-StringTable.Print(TextWriter)
-StringTable.AdjustColumnWidth(int)
-StringTable.MinWidth(predicate, width)
-StringTable.AlignRight(predicate, align?)
+### StringTableExtensions
 
-// Markdown export
-IEnumerable<T>.MarkdownTable(TextWriter, options?)
-```
+| Method | Description |
+|--------|-------------|
+| `StringTable()` | Create table from collection |
+| `StringTable(options)` | Create with custom options |
+| `MinWidth(predicate, width)` | Set column minimum width |
+| `AlignRight(predicate)` | Right-align columns |
+| `SetWidthLimit(width)` | Adjust to fit width |
+| `PrintConsole(writer, maxWidth)` | Print with width limit |
 
-## Running Tests
+### TableOptionFactory
 
-The project includes comprehensive unit tests in the `Albatross.Text.Test` project:
-
-```bash
-# Run all tests
-dotnet test
-
-# Run tests with detailed output
-dotnet test --verbosity normal
-
-# Run tests for specific framework
-dotnet test --framework net8.0
-```
-
-### Test Coverage Examples
-
-The test project demonstrates various usage patterns:
-
-```csharp
-// Basic table creation (TestStringTable.cs)
-var options = new TableOptions<TestClass>()
-    .SetColumn(x => x.Id)
-    .SetColumn(x => x.Name)
-    .SetColumn(x => x.Value);
-
-var table = objects.StringTable(options);
-
-// Reflection-based column building (TestBuildingTableOptions.cs) 
-var options = new TableOptions<TestClass>()
-    .BuildColumnsByReflection()
-    .Cast<TestClass>()
-    .Format(x => x.Value, "0.00");
-
-// Column width adjustment (TestStringTableColumnAdjustment.cs)
-var table = new StringTable(headers);
-table.AdjustColumnWidth(80); // Fit in 80 characters
-
-// Dictionary and array tables (TestStringTable.cs)
-var dict = new Dictionary<string, string> { {"Key1", "Value1"} };
-dict.StringTable().Print(writer);
-
-var array = new string[] { "Value1", "Value2" };  
-array.StringTable().Print(writer);
-```
-
-Test coverage includes:
-- String table creation and formatting
-- Column width adjustment algorithms  
-- Text truncation behavior
-- TableOptions configuration and factory functionality
-- Markdown table generation
-- Dictionary and array table support
-- Edge cases and error handling
-
-## Contributing
-
-We welcome contributions! Please follow these guidelines:
-
-1. **Fork** the repository on GitHub
-2. **Create** a feature branch from `main`:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. **Make** your changes with appropriate tests
-4. **Ensure** all tests pass:
-   ```bash
-   dotnet test
-   ```
-5. **Commit** your changes with clear messages:
-   ```bash
-   git commit -m "Add: Brief description of your changes"
-   ```
-6. **Push** to your fork and **submit** a pull request
-
-### Code Style
-- Follow existing code conventions
-- Add unit tests for new functionality
-- Update documentation for public APIs
-- Ensure code builds without warnings
-
-### Issues
-- Use GitHub Issues to report bugs or request features
-- Provide detailed reproduction steps for bugs
-- Include relevant code samples when possible
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
-
-Copyright (c) 2019 Rushui Guan
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+| Method | Description |
+|--------|-------------|
+| `Instance` | Singleton instance |
+| `Register(options)` | Register configuration |
+| `Get<T>()` | Get or create configuration |
+| `TryGet<T>(out options)` | Try to get existing configuration |

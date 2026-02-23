@@ -5,7 +5,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Albatross.Text.Table {
+	/// <summary>
+	/// Utility extension methods for table rendering, link truncation, and type detection.
+	/// </summary>
 	public static class Extensions {
+		/// <summary>
+		/// Renders a collection as a Markdown-formatted table.
+		/// </summary>
 		public static void MarkdownTable<T>(this IEnumerable<T> items, TextWriter writer, TableOptions<T>? options = null) {
 			options = options ?? TableOptionFactory.Instance.Get<T>();
 			writer.WriteItems(options.Headers, "|").WriteLine();
@@ -17,6 +23,9 @@ namespace Albatross.Text.Table {
 
 		static Regex MarkdownLinkRegex = new Regex(@"\[(?<text>[^\]]+)\]\((?<url>[^)]+)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
+		/// <summary>
+		/// Truncates a Markdown link's display text while preserving the URL.
+		/// </summary>
 		public static string TruncateMarkdownLink(this string markdownLink, int displayWidth) {
 			if (displayWidth == 0) { return string.Empty; }
 			var match = MarkdownLinkRegex.Match(markdownLink);
@@ -35,6 +44,9 @@ namespace Albatross.Text.Table {
 
 		static Regex SlackLinkRegex = new Regex(@"<(?<url>[^|]+)\|(?<text>[^\>]+)>", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
+		/// <summary>
+		/// Truncates a Slack link's display text while preserving the URL.
+		/// </summary>
 		public static string TruncateSlackLink(this string slackLink, int displayWidth) {
 			if (displayWidth == 0) { return string.Empty; }
 			var match = SlackLinkRegex.Match(slackLink);
@@ -51,6 +63,9 @@ namespace Albatross.Text.Table {
 			}
 		}
 
+		/// <summary>
+		/// Truncates text to the specified display width.
+		/// </summary>
 		public static string TruncateText(this string text, int displayWidth) {
 			if (displayWidth == 0) { return string.Empty; }
 			if (text.Length > displayWidth) {
@@ -60,6 +75,9 @@ namespace Albatross.Text.Table {
 			}
 		}
 
+		/// <summary>
+		/// Determines whether a type is a simple value type (primitives, string, DateTime, Guid, etc.).
+		/// </summary>
 		public static bool IsSimpleValue(this Type type) =>
 			type == typeof(string) || type.IsPrimitive
 			                       || type == typeof(DateTime)

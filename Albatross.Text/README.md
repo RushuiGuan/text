@@ -1,25 +1,46 @@
 # Albatross.Text
 
-A comprehensive .NET string manipulation library providing extension methods for strings, StringBuilder, and TextWriter classes.
+A .NET string manipulation library providing extension methods for strings, StringBuilder, and TextWriter.
 
-## Features
+[Full Documentation](https://rushuiguan.github.io/text/)
 
-- **Targets** - .NET Standard 2.0, .NET 8.0+
-- **String Interpolation** - Advanced `${expression}` syntax for dynamic value replacement
-- **String Extensions** - Case conversion, wildcard matching, custom trimming methods
-- **StringBuilder Extensions** - Enhanced StringBuilder functionality with EndsWith methods
-- **TextWriter Extensions** - Fluent API for formatted text writing with specialized character methods
+## Installation
 
-## Documentation
+```bash
+dotnet add package Albatross.Text
+```
 
-- **[Complete API Documentation](https://rushuiguan.github.io/text/)** - Detailed usage examples and API reference
-- **[Source Code](https://github.com/RushuiGuan/text/tree/main/Albatross.Text)** - Browse the implementation
+## Quick Start
 
-## Related Packages
+```csharp
+using Albatross.Text;
 
-- **[Albatross.Text.Table](https://www.nuget.org/packages/Albatross.Text.Table)** - Tabular data formatting
-- **[Albatross.Text.CliFormat](https://www.nuget.org/packages/Albatross.Text.CliFormat)** - Runtime expression-based formatting
+// Case conversion
+"HelloWorld".CamelCase();     // "helloWorld"
+"hello".ProperCase();         // "Hello"
 
-## License
+// Glob pattern matching
+"hello.txt".Like("*.txt");    // true
+"test".Like("t?st");          // true
 
-MIT License - see [LICENSE](https://github.com/RushuiGuan/text/blob/main/LICENSE) for details.
+// String interpolation with ${expression} syntax
+"Hello ${name}!".Interpolate(expr => expr == "name" ? "World" : "");
+// "Hello World!"
+
+// TextWriter fluent API
+writer.Append("Name").Space().Append("Age").AppendLine();
+
+// StringBuilder extensions
+var sb = new StringBuilder("Hello World");
+sb.EndsWith("World");         // true
+```
+
+## Key Features
+
+- **Case Conversion**: `CamelCase()`, `ProperCase()`
+- **Pattern Matching**: `Like()` for glob patterns (`*`, `?`)
+- **String Parsing**: `TryGetText()` for delimited text parsing
+- **Interpolation**: `${expression}` syntax with custom evaluators
+- **TextWriter Fluent API**: `Append()`, `Space()`, `Tab()`, `Comma()`, `WriteItems()`
+- **StringBuilder Extensions**: `EndsWith()` for string and char
+- **Formatting Helpers**: `MarkdownLink()`, `SlackLink()`, `Decimal2CompactText()`
