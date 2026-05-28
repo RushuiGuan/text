@@ -12,7 +12,7 @@ namespace Albatross.Text.Table {
 		/// <summary>
 		/// Renders a collection as a Markdown-formatted table.
 		/// </summary>
-		public static void MarkdownTable<T>(this IEnumerable<T> items, TextWriter writer, TableOptions<T>? options = null) {
+		public static void MarkdownTable<T>(this IEnumerable<T> items, TextWriter writer, TableOptions? options = null) {
 			options = options ?? TableOptionFactory.Instance.Get<T>();
 			writer.WriteItems(options.Headers, "|").WriteLine();
 			writer.WriteItems(options.Build().Select(x => "-").ToArray(), "|").WriteLine();

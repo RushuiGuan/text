@@ -353,7 +353,6 @@ using Albatross.Text.Table;
 
 var options = new TableOptions<Person>()
     .BuildColumnsByReflection()
-    .Cast<Person>()
     .Ignore(x => x.Id)
     .ColumnHeader(x => x.FirstName, "First")
     .Format(x => x.Salary, "C2");

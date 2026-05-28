@@ -17,11 +17,11 @@ namespace Albatross.Text.Table {
 		/// Attempts to retrieve a previously registered configuration for type T.
 		/// </summary>
 		/// <returns>True if a configuration was found; otherwise false.</returns>
-		public bool TryGet<T>([NotNullWhen(true)] out TableOptions<T>? options) {
+		public bool TryGet<T>([NotNullWhen(true)] out TableOptions? options) {
 			var type = typeof(T);
 			lock (sync) {
 				if (registration.TryGetValue(type, out var found)) {
-					options = (TableOptions<T>)found;
+					options = found;
 					return true;
 				}
 			}
@@ -32,7 +32,7 @@ namespace Albatross.Text.Table {
 		/// <summary>
 		/// Gets or creates a table configuration for type T. Auto-registers using reflection if not previously configured.
 		/// </summary>
-		public TableOptions<T> Get<T>() {
+		public TableOptions Get<T>() {
 			var type = typeof(T);
 			lock (sync) {
 				if (!registration.TryGetValue(type, out var options)) {
@@ -41,7 +41,7 @@ namespace Albatross.Text.Table {
 					}
 					registration[typeof(T)] = options;
 				}
-				return (TableOptions<T>)options;
+				return options;
 			}
 		}
 
@@ -63,14 +63,14 @@ namespace Albatross.Text.Table {
 		/// <summary>
 		/// Registers a custom table configuration for type T, overwriting any existing configuration.
 		/// </summary>
-		public void Register<T>(TableOptions<T> options) => Register((TableOptions)options);
+		public void Register<T>(TableOptions<T> options) => Register(typeof(T), options);
 
 		/// <summary>
 		/// Registers a custom table configuration, overwriting any existing configuration for that type.
 		/// </summary>
-		public void Register(TableOptions options) {
+		internal void Register(Type type, TableOptions options) {
 			lock (sync) {
-				registration[options.Type] = options;
+				registration[type] = options;
 			}
 		}
 

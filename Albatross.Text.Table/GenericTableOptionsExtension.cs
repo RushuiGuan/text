@@ -65,7 +65,7 @@ namespace Albatross.Text.Table {
 		/// Automatically discovers and configures columns from all public instance properties of type T.
 		/// </summary>
 		public static TableOptions<T> BuildColumnsByReflection<T>(this TableOptions<T> options) {
-			foreach (var property in options.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
+			foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)) {
 				if (property.GetIndexParameters().Length > 0) {
 					// Skip indexers
 					continue;

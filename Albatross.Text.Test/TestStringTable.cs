@@ -47,7 +47,7 @@ namespace Albatross.Text.Test {
 		[Fact]
 		public void TestStringTablePrintingWithMismatchValueLength() {
 			var options = new TableOptions<TestClass>()
-				.BuildColumnsByReflection().Cast<TestClass>()
+				.BuildColumnsByReflection()
 				.Format(x => x.Markdown, (e, v) => new TextValue("[Google](https://www.google.com)", "Google".Length, (_, size) => ""))
 				.ColumnOrder(x => x.Markdown, -1);
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0M, Markdown = "Google" };

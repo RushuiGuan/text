@@ -35,7 +35,7 @@ namespace Albatross.Text.Test {
 
 		[Fact]
 		public void TestColumnOrders() {
-			var options = new TableOptions<TestClass>().BuildColumnsByReflection().Cast<TestClass>();
+			var options = new TableOptions<TestClass>().BuildColumnsByReflection();
 			options.ColumnOptions.Select(x => new { x.Property, x.Order }).Should().BeEquivalentTo(new[] {
 				new { Property = nameof(TestClass.Id), Order = 0 },
 				new { Property = nameof(TestClass.Name), Order = 1 },
@@ -79,7 +79,7 @@ namespace Albatross.Text.Test {
 
 		[Fact]
 		public void TestHeaders() {
-			var options = new TableOptions<TestClass>().BuildColumnsByReflection().Cast<TestClass>();
+			var options = new TableOptions<TestClass>().BuildColumnsByReflection();
 			options.ColumnHeader(x => x.Id, "C");
 			options.ColumnHeader(x => x.Name, "A");
 			options.ColumnHeader(x => x.Value, "B");
@@ -100,7 +100,7 @@ namespace Albatross.Text.Test {
 
 		[Fact]
 		public void TestFormatter() {
-			var options = new TableOptions<TestClass>().BuildColumnsByReflection().Cast<TestClass>();
+			var options = new TableOptions<TestClass>().BuildColumnsByReflection();
 			options.Format(x => x.Value, "0.00");
 			var obj = new TestClass { Id = 1, Name = "name", Value = 1.0 };
 			var values = options.GetValue(obj);

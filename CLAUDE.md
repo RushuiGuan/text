@@ -39,7 +39,7 @@ Three interconnected .NET libraries for text manipulation and formatting:
 ### Table Configuration Factory Pattern
 - Use `TableOptionFactory.Instance` singleton for global registration
 - Types auto-register on first use via `FallBackRegistration<T>()` using reflection
-- Pattern: `new TableOptions<T>().BuildColumnsByReflection().Cast<T>()` for fluent API
+- Pattern: `new TableOptions<T>().BuildColumnsByReflection()` for fluent API
 - Key file: `Albatross.Text.Table/TableOptionFactory.cs`
 
 ### Expression-Based CLI Formatting

@@ -43,8 +43,7 @@ Id Name     Price
 
 ```csharp
 var options = new TableOptions<Product>()
-    .BuildColumnsByReflection()
-    .Cast<Product>();
+    .BuildColumnsByReflection();
 
 products.StringTable(options).Print(Console.Out);
 ```
@@ -74,7 +73,6 @@ Keyboard 75
 ```csharp
 var options = new TableOptions<Product>()
     .BuildColumnsByReflection()
-    .Cast<Product>()
     .ColumnHeader(x => x.Id, "#")
     .ColumnHeader(x => x.Name, "Product Name")
     .ColumnHeader(x => x.Price, "Unit Price");
@@ -87,7 +85,6 @@ Lower order values appear first. Default order is based on property declaration.
 ```csharp
 var options = new TableOptions<Product>()
     .BuildColumnsByReflection()
-    .Cast<Product>()
     .ColumnOrder(x => x.Price, -1)   // Move Price to first
     .ColumnOrder(x => x.Name, 0)     // Name second
     .ColumnOrder(x => x.Id, 1);      // Id last
@@ -98,7 +95,6 @@ var options = new TableOptions<Product>()
 ```csharp
 var options = new TableOptions<Product>()
     .BuildColumnsByReflection()
-    .Cast<Product>()
     .Ignore(x => x.Id);  // Remove Id column
 ```
 
@@ -107,7 +103,6 @@ var options = new TableOptions<Product>()
 ```csharp
 var options = new TableOptions<Product>()
     .BuildColumnsByReflection()
-    .Cast<Product>()
     .Format(x => x.Price, "C2");  // Currency format: $999.99
 ```
 
@@ -116,7 +111,6 @@ var options = new TableOptions<Product>()
 ```csharp
 var options = new TableOptions<Product>()
     .BuildColumnsByReflection()
-    .Cast<Product>()
     .SetColumn(x => x.Name, product => product.Name.ToUpper());
 ```
 
@@ -125,7 +119,6 @@ var options = new TableOptions<Product>()
 ```csharp
 var options = new TableOptions<Product>()
     .BuildColumnsByReflection()
-    .Cast<Product>()
     .Format(x => x.Price, (product, value) =>
         new TextValue(((decimal)value!).ToString("C2")));
 ```
@@ -141,7 +134,6 @@ Thread-safe singleton for registering and reusing table configurations globally.
 ```csharp
 var options = new TableOptions<Product>()
     .BuildColumnsByReflection()
-    .Cast<Product>()
     .Format(x => x.Price, "C2")
     .Ignore(x => x.Id);
 
@@ -329,7 +321,6 @@ tables.AlignAll();
 | Method | Description |
 |--------|-------------|
 | `BuildColumnsByReflection()` | Auto-discover columns from properties |
-| `Cast<T>()` | Convert to typed options for fluent API |
 | `SetColumn(expression)` | Add column by property expression |
 | `SetColumn(expression, getValue)` | Add column with custom value getter |
 | `Ignore(expression)` | Remove column |
@@ -367,6 +358,6 @@ tables.AlignAll();
 | Method | Description |
 |--------|-------------|
 | `Instance` | Singleton instance |
-| `Register(options)` | Register configuration |
+| `Register<T>(options)` | Register configuration |
 | `Get<T>()` | Get or create configuration |
 | `TryGet<T>(out options)` | Try to get existing configuration |

@@ -7,14 +7,6 @@ namespace Albatross.Text.Table {
 	/// Configuration for rendering collections as formatted text tables. Defines columns, headers, and formatting rules.
 	/// </summary>
 	public class TableOptions {
-		public TableOptions(Type type) {
-			this.Type = type;
-		}
-
-		/// <summary>
-		/// The element type this configuration is designed for.
-		/// </summary>
-		public Type Type { get; }
 		List<TableColumnOption> columnOptions = new List<TableColumnOption>();
 
 		/// <summary>
@@ -138,6 +130,5 @@ namespace Albatross.Text.Table {
 	/// </summary>
 	/// <typeparam name="T">The element type of collections to be rendered.</typeparam>
 	public class TableOptions<T> : TableOptions {
-		public TableOptions() : base(typeof(T)) { }
 	}
 }
